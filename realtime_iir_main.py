@@ -1,21 +1,22 @@
 from pyfirmata2 import Arduino
 from scipy import signal
 import iir_filter as iir
-import realtime_plot as rtp
+import util.realtime_plot as rtp
+import util.realtime_emulator as rte
 
-""" Constant """
-fs = 1000   # Max 1000
+""" Constants """
+fs = 100   # Max 1000
 fn = fs / 2
 
 # Cutoff Frequency (Hz)
-fc = 5
+fc = 0.5
 
 """ Real Time Plotters """
-raw_data_plot = rtp.RealtimePlot(fs, 500, "Pre-Filter")
-filter_data_plot = rtp.RealtimePlot(fs, 500, "Post-Filter")
+raw_data_plot = rtp.RealtimePlot(fs, 250, "Pre-Filter", show_fft = False)
+filter_data_plot = rtp.RealtimePlot(fs, 250, "Post-Filter", show_fft = True)
 
 """ IIR Filter """
-sos = signal.butter(2, fc / fn, "lowpass", output="sos")
+sos = signal.butter(1, fc / fn, "highpass", output="sos")
 f = iir.IIR_filter(sos)
 
 """ Sample Process Function """
