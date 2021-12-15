@@ -1,8 +1,7 @@
 from pyfirmata2 import Arduino
 from scipy import signal
 import iir_filter as iir
-import util.realtime_plot as rtp
-import util.realtime_emulator as rte
+import realtime_plot as rtp
 
 """ Constants """
 fs = 100   # Max 1000
@@ -12,7 +11,7 @@ fn = fs / 2
 fc = 0.5
 
 """ Real Time Plotters """
-raw_data_plot = rtp.RealtimePlot(fs, 250, "Pre-Filter", show_fft = False)
+raw_data_plot = rtp.RealtimePlot(fs, 250, "Pre-Filter", show_fft = True)
 filter_data_plot = rtp.RealtimePlot(fs, 250, "Post-Filter", show_fft = True)
 
 """ IIR Filter """

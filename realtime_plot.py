@@ -4,7 +4,7 @@ import numpy as np
 
 """ Real-Time Plotter """
 class RealtimePlot:
-    def __init__(self, fs, buffer_size, title, running_limits=[-0.5, 0.5], fft_limits=[0,50], show_fft=False):
+    def __init__(self, fs, buffer_size, title, running_limits=[-0.25, 0.25], fft_limits=[0,50], show_fft=False):
         # Buffer
         self.plot_buffer = np.zeros(buffer_size)
         self.buffer_size = buffer_size
@@ -15,6 +15,7 @@ class RealtimePlot:
             self.fig, self.ax = plt.subplots(ncols=2)
             
             # Running Plot
+            self.ax[0].plot([0, buffer_size-1],[0,0],color="r")
             self.line_r, = self.ax[0].plot(self.plot_buffer)
             self.ax[0].set_ylim(running_limits[0], running_limits[1])
             self.ax[0].set_title(title)

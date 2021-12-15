@@ -1,15 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot(raw, filtered, fs, split = True):
+def plot(raw, filtered, fs, title="", split = True):
     fig, ax = plt.subplots(ncols=2)
     N = len(raw)
 
     """ Data """
     time = np.linspace(0, N/fs, N)
     
-    ax[0].set_title("Data")
-    ax[0].set_ylim(-1, 1)
+    ax[0].set_title(title)
+    ax[0].set_ylim(-0.25, 0.25)
     ax[0].plot(time, raw)
     ax[0].plot(time, filtered)
 
@@ -26,18 +26,15 @@ def plot(raw, filtered, fs, split = True):
 
     _fx = np.linspace(0, fs/2, len(_fft_raw))
 
-    ax[1].set_title("FFT")
+    ax[1].set_title(title + " FFT")
     ax[1].plot(_fx, _fft_raw)
     ax[1].plot(_fx, _fft_filtered)
 
-N = 5000
-fs = 500
-
-""" Create Signal """
-# Noise
-r = np.random.rand(N) / 50
-# DC Offset
-r += 0.5
+""" Load Data """
+A = np.loadtxt("Recordings/A.csv", delimiter=",")
+B = np.loadtxt("Recordings/B.csv", delimiter=",")
+C = np.loadtxt("Recordings/C.csv", delimiter=",")
+fs = 1000
 
 """ IIR Filter """
 import iir_filter
@@ -48,10 +45,16 @@ sos = np.concatenate([sos_hp, sos_lp])
 f = iir_filter.IIR_filter(sos)
 
 """ Do Filter """
-fw = np.zeros(N)
-for i in range(N):
-    fw[i] = f.filter(r[i])
+A_filtered = np.zeros(len(A))
+B_filtered = np.zeros(len(B))
+C_filtered = np.zeros(len(C))
+for i in range(len(A)):
+    A_filtered[i] = f.filter(A[i])
+    B_filtered[i] = f.filter(B[i])
+    C_filtered[i] = f.filter(C[i])
 
-plot(r, fw, fs)
+plot(A, A_filtered, fs, title="'Recording A'")
+plot(B, B_filtered, fs, title="'Recording B'")
+plot(C, C_filtered, fs, title="'Recording C'")
 
 plt.show()
