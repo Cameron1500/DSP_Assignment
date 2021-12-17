@@ -41,7 +41,7 @@ import iir_filter
 from scipy import signal
 sos_hp = signal.butter(2, 0.5 / (fs/2), "highpass", output="sos")   # High Pass (DC Removal)
 sos_lp = signal.butter(2, 10 / (fs/2), "lowpass", output="sos")     # Low Pass (Noise Removal)
-sos = np.concatenate([sos_hp, sos_lp])
+sos = np.concatenat([sos_hp, sos_lp])
 f = iir_filter.IIR_filter(sos)
 
 """ Do Filter """
