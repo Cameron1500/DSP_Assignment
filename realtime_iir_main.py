@@ -15,9 +15,10 @@ fs = 1000   # Max 1000
 fn = fs / 2
 
 """ IIR Filter Design """
-# Second-Order HP at 0.1 Hz
+# DC Noise Removal (0.1Hz High-pass)
 sos_hp = signal.butter(2, 0.1 / fn, "highpass", output="sos")
-sos_lp = signal.butter(2, 10 / fn, "lowpass", output="sos")
+# Anti-Alising (500Hz Low Pass)
+sos_lp = signal.butter(2, 500 / fn, "lowpass", output="sos")
 
 # Combine Filters
 sos = np.concatenate([sos_lp, sos_hp])
