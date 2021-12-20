@@ -108,6 +108,13 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(hand_calculated_values,
                          filter_sos_calculated_values)  # compare both arrays to check if they aer similar
 
+try: # BF 20/12/21 - check if i am being run in the ipython shell
+    __IPYTHON__
+except:
+    __IPYTHON__ = False
 
-if __name__ == '__main__':
-    unittest.main()
+if not __IPYTHON__:
+    if __name__ == '__main__':
+        unittest.main()
+else: # BF 20/21/21 - This code allows the unit test to run in the IPyhton shell
+    unittest.main(argv=['first-arg-is-ignored'], exit=False)
