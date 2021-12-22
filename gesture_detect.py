@@ -20,10 +20,11 @@ class GestureDetect:
         pos = sample >= self.threshold
         neg = sample <= -self.threshold
 
-        # Determine Peak Start/Stop
-        if (pos and not self.pos) or (neg and not self.neg): # Start of positive/negative peak
-            tracking = True
+        # Set tracking
+        if not self.tracking:
+            self.tracking = pos or neg
 
+        # Detect end of peaks
         if self.pos and not pos: # End of positive peak
             if self.peak_count == 0:
                 self.inital_peak = 1
@@ -33,18 +34,19 @@ class GestureDetect:
                 self.inital_peak = -1
             self.peak_count += 1
 
-        # Wait for Movement to stop
-        if (not pos) and (not neg):
-            self.sample_count = 0
-        else:
-            self.sample_count += 1
-        
+        # Search for end of movement
+        if self.tracking:
+            if not(pos or neg):
+                self.sample_count += 1
+            else:
+                self.sample_count = 0
+ 
         # Guess Gesture
         if self.sample_count >= self.wait_samples:
             # Guess Movement
             if self.peak_count <= 2:
                 print("Moved ", end="")
-                if self.inital_peak:
+                if self.inital_peak == 1:
                     print("Left.")
                 else:
                     print("Right.")
