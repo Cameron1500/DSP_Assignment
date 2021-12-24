@@ -5,13 +5,11 @@ def plot(data, labels, fs, title="", split = True):
     fig, ax = plt.subplots(ncols=2)
     N = len(data[0])
 
-    print(np.shape(data))
-
     """ Data """
     time = np.linspace(0, N/fs, N)
     
     ax[0].set_title(title)
-    ax[0].set_ylim(-0.25, 0.25)
+    ax[0].set_ylim(-5, 5)
     for i in range(len(data)):
         ax[0].plot(time, data[i], label=labels[i])
     ax[0].legend()
@@ -34,9 +32,18 @@ def plot(data, labels, fs, title="", split = True):
         ax[1].plot(_fx, i)
 
 """ Load Data """
-A = np.loadtxt("Recordings/A.csv", delimiter=",")
-#B = np.loadtxt("Recordings/B.csv", delimiter=",")
-#C = np.loadtxt("Recordings/C.csv", delimiter=",")
+from pathlib import Path
+
+source_dir = Path(__file__).resolve().parent.parent
+file_name = input("File Name: ")
+source_dir = source_dir / "Recordings" / file_name
+
+if not source_dir.is_file():
+    print("No recoginsied file:")
+    print(source_dir)
+    exit()
+
+csv = np.loadtxt(str(source_dir), delimiter=",")
 fs = 1000
 
 """ IIR Filter """
@@ -45,21 +52,19 @@ from scipy import signal
 sos_hp = signal.butter(2, 0.5 / (fs/2), "highpass", output="sos")   # High Pass (DC Removal)
 sos_lp = signal.butter(2, 10 / (fs/2), "lowpass", output="sos")     # Low Pass (Noise Removal)
 sos = np.concatenate([sos_hp, sos_lp])
-f = iir_filter.IIR_filter(sos)
+
+xf = iir_filter.IIR_filter(sos)
+yf = iir_filter.IIR_filter(sos)
+zf = iir_filter.IIR_filter(sos)
 
 """ Do Filter """
-A_filtered = np.zeros(len(A))
-A_matched = np.zeros(len(A))
-#B_filtered = np.zeros(len(B))
-#C_filtered = np.zeros(len(C))
-for i in range(len(A)):
-    A_filtered[i] = f.filter(A[i])
-    A_matched[i] = A_filtered[i] * np.abs(A_filtered[i])
-    #B_filtered[i] = f.filter(B[i])
-    #C_filtered[i] = f.filter(C[i])
+filtered = np.zeros(shape=np.shape(csv))
+for i in range(np.shape(csv)[0]):
+    filtered[i,0] = xf.filter(csv[i,0])
+    filtered[i,1] = yf.filter(csv[i,1])
+    filtered[i,2] = zf.filter(csv[i,2])
 
-plot([A, A_filtered, A_matched], ["Raw", "Filtered", "Matched"], fs, title="'Recording A'")
-#plot([B, B_filtered], ["Raw", "Filtered"], fs, title="'Recording B'")
-#plot([C, C_filtered], ["Raw", "Filtered"], fs, title="'Recording C'")
+plot([csv[:,0], csv[:,1], csv[:,2]], ["X", "Y", "Z"], fs, title="Raw Data")
+plot([filtered[:,0], filtered[:,1], filtered[:,2]], ["X", "Y", "Z"], fs, title="Filtered")
 
 plt.show()
