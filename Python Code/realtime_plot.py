@@ -1,5 +1,5 @@
 from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.animation as animation
+from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 import time
@@ -42,7 +42,7 @@ class RealtimePlots:
             line, = self.ax.plot(self.buffers[i].update())
             self.lines.append(line)
 
-        self.anim = animation.FuncAnimation(self.fig, self.update, interval=100)
+        self.anim = FuncAnimation(self.fig, self.update, interval=100)
         self.update_count = 0
 
         # Sample Rate
@@ -80,7 +80,7 @@ class RealtimeVectorPlot:
         self.ax.set_ylim(-1.5, 1.5)
         self.ax.set_zlim(-1.5, 1.5)
 
-        self.anim = animation.FuncAnimation(self.fig, self.update, interval=100)
+        self.anim = FuncAnimation(self.fig, self.update, interval=100)
         self.q = self.ax.quiver(0, 0, 0, 0, 0, 1)
         
     def update(self, x):
