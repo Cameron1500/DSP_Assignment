@@ -14,7 +14,7 @@ fn = fs / 2
 
 """ IIR Filter Design """
 # Noise Removal
-sos = signal.butter(2, 0.5 / fn, "lowpass", output="sos")
+sos = signal.butter(2, 1 / fn, "lowpass", output="sos")
 
 x_filter = iir.IIR_filter(sos)
 y_filter = iir.IIR_filter(sos)
