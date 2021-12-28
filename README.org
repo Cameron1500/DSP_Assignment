@@ -62,17 +62,15 @@ From:[[github:firmata/protocol/blob/master/i2c.md]]
      - {bit 5: address mode, 1 = 10-bit mode}
      - {bits 4-3: read/write, 00 = write, 01 = read once, 10 = read continuously, 11 = stop reading}
      - {bits 2-0: slave address MSB in 10-bit mode, not used in 7-bit mode}
-4.   data 0 (LSB) - For I2C read bit 4-5 are the target slave register address LSB
-5.   data 0 (MSB)
-6.   data 1 (LSB) - For
-7.   data 1 (MSB)
- [fn::Note: that this the data structure in 7 bit format of course it is not received this way so you will see some bit-shifting to correct for this]
-+ payload[0] - target slave address
-+ payload[1] - Mode/Slave MSB - I think this includes some other meta data to do with addressing but it seems unsupported anyway
-+ payload[2] - target slave register LSB, MSB
-+ payload[3->] - Number of bytes to extract from the register LSB, MSB
-*** Continuous reporting mode
-As far as I can tell, all I2C sensor data requested via *SYSEX* command is handled in the same way by the same method on the firmware side (*readAndReportData*). This means, that there is no way to tell which I2C reply is which unless you have only just sent a single request. [fn::all data buffers handled by this and other functions prior to sending are handled as simple byte arrays conversion to 7 bit bytes is handled in the *sendSysex* method]
+4.   data 0 (Target slave register LSB)
+5.   data 0 (Target slave register MSB)
+6.   data 1 (Number of bytes to extract LSB)
+7.   data 1 (Number of bytes to extract MSB)
+
+*** Firmware implementation
+As far as I can tell, all I2C sensor data requested via *SYSEX* command is handled in the same way by the same method on the firmware side (*readAndReportData*). This means, that there is no way to tell which I2C reply is which unless you have only just sent a single request.
+
+Note: all data buffers handled by this and other functions prior to sending are handled as simple byte arrays conversion to 7 bit bytes is handled in the *sendSysex* method
 
 *I2CFirmata.cpp* implementation:
 #+begin_src C++
