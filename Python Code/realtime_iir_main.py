@@ -14,15 +14,15 @@ fn = fs / 2
 
 """ IIR Filter Design """
 # Noise Removal
-sos = signal.butter(2, 1 / fn, "lowpass", output="sos")
+sos = signal.butter(1, 1 / fn, "lowpass", output="sos")
 
 x_filter = iir.IIR_filter(sos)
 y_filter = iir.IIR_filter(sos)
 z_filter = iir.IIR_filter(sos)
 
 """ Real Time Plotters """
-raw = rtp.RealtimePlots(fs, 2, "Raw Data", sample_limits=[-5,5], channels=3)
-filtered = rtp.RealtimePlots(fs, 2, "Filtered Data", sample_limits=[-5,5], channels=3)
+raw = rtp.RealtimePlots(fs, 2, "Raw Data", ["X", "Y", "Z"], sample_limits=[-5,5], channels=3)
+filtered = rtp.RealtimePlots(fs, 2, "Filtered Data", ["X", "Y", "Z"], sample_limits=[-5,5], channels=3)
 
 orientation = rtp.RealtimeVectorPlot()
 
@@ -39,7 +39,7 @@ def addX(data):
     raw.addSample(acc, channel=0)
 
     f_acc = x_filter.filter(acc)
-    orientation.addSample(acc, channel=0)
+    orientation.addSample(f_acc, channel=0)
     filtered.addSample(f_acc, channel=0)
 
 def addY(data):
@@ -61,9 +61,9 @@ def addZ(data):
 """ Aurdino Data Aquisition """
 board = Arduino(Arduino.AUTODETECT)
 board.samplingOn(1000/fs)
-board.analog[0].register_callback(addY)
+board.analog[0].register_callback(addX)
 board.analog[0].enable_reporting()
-board.analog[1].register_callback(addX)
+board.analog[1].register_callback(addY)
 board.analog[1].enable_reporting()
 board.analog[2].register_callback(addZ)
 board.analog[2].enable_reporting()

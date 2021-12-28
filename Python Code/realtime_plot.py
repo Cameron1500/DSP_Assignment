@@ -22,7 +22,7 @@ class RollingBuffer:
 
 """ Real-Time Plotter Variable Channel """
 class RealtimePlots:
-    def __init__(self, fs, window_time, title, sample_limits=[-0.5, 0.5], channels=1):
+    def __init__(self, fs, window_time, title, labels, sample_limits=[-0.5, 0.5], channels=1):
         # Buffer
         self.buffer_size = fs * window_time
         self.buffers = []
@@ -31,7 +31,7 @@ class RealtimePlots:
         self.fig, self.ax = plt.subplots()
         
         # Sample Plot
-        self.ax.plot([0, self.buffer_size-1],[0,0],color="r")
+        self.ax.plot([0, self.buffer_size-1],[0,0],"r--",label="Zero")
         self.ax.set_ylim(sample_limits[0], sample_limits[1])
         self.ax.set_title(title)
         self.lines = []
@@ -39,8 +39,9 @@ class RealtimePlots:
         # Plot Buffers
         for i in range(channels):
             self.buffers.append(RollingBuffer(self.buffer_size))
-            line, = self.ax.plot(self.buffers[i].update())
+            line, = self.ax.plot(self.buffers[i].update(), label=labels[i])
             self.lines.append(line)
+        self.ax.legend()
 
         self.anim = FuncAnimation(self.fig, self.update, interval=100)
         self.update_count = 0
@@ -76,18 +77,24 @@ class RealtimeVectorPlot:
         self.vec = np.zeros(3)
 
         self.fig, self.ax = plt.subplots(subplot_kw=dict(projection="3d"))
-        self.ax.set_xlim(-1.5, 1.5)
-        self.ax.set_ylim(-1.5, 1.5)
-        self.ax.set_zlim(-1.5, 1.5)
+        self.ax.set_xlim(-1.0, 1.0)
+        self.ax.set_ylim(-1.0, 1.0)
+        self.ax.set_zlim(-1.0, 1.0)
+        self.ax.set_xticks([])
+        self.ax.set_yticks([])
+        self.ax.set_zticks([])
 
         self.anim = FuncAnimation(self.fig, self.update, interval=100)
         self.q = self.ax.quiver(0, 0, 0, 0, 0, 1)
+        self.x = self.ax.quiver(0, 0, 0, 1, 0 ,0, color="red")
+        self.y = self.ax.quiver(0, 0, 0, 0, 1 ,0, color="green")
+        self.z = self.ax.quiver(0, 0, 0, 0, 0 ,1, color="blue")
         
     def update(self, x):
         m = np.max(np.abs(self.vec))
         if m != 0:
             self.q.remove()
-            self.q = self.ax.quiver(0, 0, 0, self.vec[0] / m, self.vec[1] / m, self.vec[2] / m)
+            self.q = self.ax.quiver(0, 0, 0, self.vec[0] / m, self.vec[1] / m, self.vec[2] / m, color="black")
 
     def addSample(self, v, channel=0):
         self.vec[channel] = v
