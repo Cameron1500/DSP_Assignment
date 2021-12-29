@@ -2,11 +2,12 @@
 
 * Project Todo :NoExport:
 ** Project to-dos:
-*** TODO Add real-time angle measurements to plot :Ben:
-*** TODO Get latex pdf compilation working [0/3]:Ben:
-- [ ] instal tex package
-- [ ] setup ORG doc for export
-- [ ] Copy in source code
+*** TODO Add real-time angle measurements to plot [0/2] :Ben:
+- [ ]
+*** TODO Get latex pdf compilation working [2/3] :Ben:
+- [X] instal tex package
+- [X] setup ORG doc for export
+- [-] Copy in source code
 *** TODO add a filter unit test in the frequency domain
 - calculate the impulse response of the filter and use the fft to determine the frequency reponse
 *** TODO Share/modify plotting code
@@ -23,7 +24,7 @@
 ** Report Question 4
 
 
-* Table Of contents :TOC:NoExport:
+* Table Of contents :TOC_3:NoExport:
 - [[#introduction][Introduction]]
 - [[#question-1][Question 1]]
 - [[#question-2][Question 2]]
