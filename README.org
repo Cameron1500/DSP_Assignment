@@ -1,22 +1,31 @@
 #+TITLE: UofG Masters DSP Project
+#+INCLUDE: "~/.doom.d/orgReportHeader.org"
 * Foreword
 This is the source code for the masters year DSP project on real time IIR filtering at the university of Glasgow.
-This read-me is currently acting as a notebook for this project and should not be seen as documentation as such.
+This read-me is currenly acting as a notebook for this project and should not be seen as documentation as such.
 
 Note: Primarily these notes relate to the implementation of I2C in Firmata as well as the relevant registers of the MPU-6050 however it seems like this sensor will not be used in favour of the ADXL335 since getting I2C working with firmata is proving to be a nightmare. I will however leave my notes on the matter in here for future reference.
 
-* Table of Contents :TOC:
+* Table of Contents :TOC_3:noexport:
 - [[#foreword][Foreword]]
 - [[#reference-material][Reference Material]]
 - [[#esp-32-reference][ESP 32 Reference]]
   - [[#pin-layout][Pin Layout]]
 - [[#sysex-command-syntax-i2c-ect][SYSEX Command Syntax (I2C ect)]]
   - [[#aditional-notes][Aditional Notes]]
+    - [[#pyfirmata-expected-baudrate][Pyfirmata expected Baudrate]]
   - [[#frimata-protocol-sysex-commands][Frimata protocol *SYSEX* Commands]]
-  - [[#sysex-i2c_request-i2c-request][*SYSEX I2C_REQUEST* (I2C request)]]
-  - [[#sysex-i2c_reply-returned-data-structure][*SYSEX I2C_REPLY* Returned Data structure]]
+  - [[#sysex-i2c_request-i2c-request][SYSEX I2C_REQUEST (I2C request)]]
+    - [[#frimata-protocol-sysex-i2c_request-structure][Frimata protocol *SYSEX I2C_Request* structure]]
+    - [[#firmware-implementation][Firmware implementation]]
+    - [[#i2cfirmatacpp-implementation][*I2CFirmata.cpp* implementation:]]
+  - [[#sysex-i2c_reply-returned-data-structure][SYSEX I2C_REPLY Returned Data structure]]
+    - [[#returned-data-structure][Returned Data Structure]]
+    - [[#converting-back-from-7-bit-bytes][Converting back from 7 bit bytes]]
 - [[#mpu-6050][MPU 6050]]
   - [[#mpu-6050-i2c][MPU-6050 I2C]]
+    - [[#i2c-address][I2C Address]]
+    - [[#sensor-data-registers][Sensor Data Registers]]
 
 * Reference Material
 + [[file:Refference/MPU-6000-Datasheet1.pdf][MPU-6000/6050 datasheet]]
@@ -49,7 +58,7 @@ From: [[https://circuits4you.com/2018/12/31/esp32-devkit-esp32-wroom-gpio-pinout
 + REPORT_FIRMWARE -> 121
 + SAMPLING_INTERVAL -> 122
 + REPORT_VERSION -> 249
-** *SYSEX I2C_REQUEST* (I2C request)
+** SYSEX I2C_REQUEST (I2C request)
 Any *SYSEX* command is first handled by the *handleSysex* method which then conditionally routes *I2C_REQUEST* commands to the *handleI2CRequest* method of *I2CFirmata*
 *** Frimata protocol *SYSEX I2C_Request* structure
 From:[[github:firmata/protocol/blob/master/i2c.md]]
@@ -150,7 +159,7 @@ void I2CFirmata::handleI2CRequest(byte argc, byte* argv)
     break;
     ...// more here
 #+end_src
-** *SYSEX I2C_REPLY* Returned Data structure
+** SYSEX I2C_REPLY Returned Data structure
 Data returned from an I2C request is always Prefixed with the *SYSEX* command: *SYSEX_I2C_REPLY*
 *** Returned Data Structure
 From:
@@ -198,4 +207,4 @@ From:[[file:Refference/MPU-6000-Register-Map1.pdf][MPU-6050 Register Datasheet]]
 #+ATTR_LATEX:  :width 400
 [[file:Refference/TempRegister.png]]
 Temp Formula:
-\( Temp_{deg C} = (Temp_{Reg (signed)})/340 +36.53 )/
+\(T_{deg C} = (T_{Reg})/340 +36.53\)
