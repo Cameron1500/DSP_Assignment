@@ -2,7 +2,7 @@
 #+INCLUDE: "~/.doom.d/orgReportHeader.org"
 * Foreword
 This is the source code for the masters year DSP project on real time IIR filtering at the university of Glasgow.
-This read-me is currenly acting as a notebook for this project and should not be seen as documentation as such.
+This read-me is currently acting as a notebook for this project and should not be seen as documentation as such.
 
 Note: Primarily these notes relate to the implementation of I2C in Firmata as well as the relevant registers of the MPU-6050 however it seems like this sensor will not be used in favour of the ADXL335 since getting I2C working with firmata is proving to be a nightmare. I will however leave my notes on the matter in here for future reference.
 

@@ -3,7 +3,7 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 import time
-
+import calcAngles
 """ Rolling Buffer """
 class RollingBuffer:
     def __init__(self, size):
@@ -89,12 +89,24 @@ class RealtimeVectorPlot:
         self.x = self.ax.quiver(0, 0, 0, 1, 0 ,0, color="red")
         self.y = self.ax.quiver(0, 0, 0, 0, 1 ,0, color="green")
         self.z = self.ax.quiver(0, 0, 0, 0, 0 ,1, color="blue")
-        
+
+        self.tLastUpdate = 0
+        self.updatePeriod_s = 1
+        self.label = self.ax.text(0, 0, 0, "test", transform=self.ax.transAxes)
+        self.angle = np.array([0,0,0])
+
     def update(self, x):
         m = np.max(np.abs(self.vec))
         if m != 0:
             self.q.remove()
             self.q = self.ax.quiver(0, 0, 0, self.vec[0] / m, self.vec[1] / m, self.vec[2] / m, color="black")
+            #angle calcs
+            now = time.time()
+            if (now - self.tLastUpdate)>self.updatePeriod_s:
+                #angle between the vector and the x plane
+                self.angle = calcAngles.calcAngles(self.vec)
+                self.label.set_text(f"angle (deg) x:{self.angle[0]}, y:{self.angle[1]}, z:{self.angle[2]}")
+                self.tLastUpdate = now
 
     def addSample(self, v, channel=0):
         self.vec[channel] = v
