@@ -21,10 +21,8 @@ y_filter = iir.IIR_filter(sos)
 z_filter = iir.IIR_filter(sos)
 
 """ Real Time Plotters """
-raw = rtp.RealtimePlots(fs, 2, "Raw Data", ["X", "Y", "Z"], sample_limits=[-5,5], channels=3)
-filtered = rtp.RealtimePlots(fs, 2, "Filtered Data", ["X", "Y", "Z"], sample_limits=[-5,5], channels=3)
-
-orientation = rtp.RealtimeVectorPlot()
+sample_plot = rtp.RealtimePlots(fs, 2, ["X", "Y", "Z"], sample_limits=[-5,5], channels=3)
+orientation_plot = rtp.RealtimeVectorPlot()
 
 """ Convert Normalized Voltage to Acceleration """
 def v2a(n_volt):
@@ -36,28 +34,25 @@ def v2a(n_volt):
 """ Sample Process Function """
 def addX(data):
     acc = v2a(data)
-    raw.addSample(acc, channel=0)
-
     f_acc = x_filter.filter(acc)
-    orientation.addSample(f_acc, channel=0)
-    filtered.addSample(f_acc, channel=0)
+
+    sample_plot.addSample(acc, f_acc, channel=0)
+    orientation_plot.addSample(f_acc, channel=0)
 
 def addY(data):
     acc = v2a(data)
-    raw.addSample(acc, channel=1)
-
     f_acc = y_filter.filter(acc)
-    orientation.addSample(f_acc, channel=1)
-    filtered.addSample(f_acc, channel=1)
+
+    sample_plot.addSample(acc, f_acc, channel=1)
+    orientation_plot.addSample(f_acc, channel=1)
 
 def addZ(data):
     acc = v2a(data)
-    raw.addSample(acc, channel=2)
-
     f_acc = z_filter.filter(acc)
-    orientation.addSample(f_acc, channel=2)
-    filtered.addSample(f_acc, channel=2)
 
+    sample_plot.addSample(acc, f_acc, channel=2)
+    orientation_plot.addSample(f_acc, channel=2)
+    
 """ Aurdino Data Aquisition """
 board = Arduino(Arduino.AUTODETECT)
 board.samplingOn(1000/fs)

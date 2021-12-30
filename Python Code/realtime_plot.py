@@ -22,39 +22,51 @@ class RollingBuffer:
 
 """ Real-Time Plotter Variable Channel """
 class RealtimePlots:
-    def __init__(self, fs, window_time, title, labels, sample_limits=[-0.5, 0.5], channels=1):
+    def __init__(self, fs, window_time, labels, sample_limits=[-0.5, 0.5], channels=1):
         # Buffer
         self.buffer_size = fs * window_time
-        self.buffers = []
+        self.r_buffers = []
+        self.f_buffers = []
 
         # Figure Plot
-        self.fig, self.ax = plt.subplots()
+        self.fig, self.ax = plt.subplots(nrows=2)
         
         # Sample Plot
-        self.ax.plot([0, self.buffer_size-1],[0,0],"r--",label="Zero")
-        self.ax.set_ylim(sample_limits[0], sample_limits[1])
-        self.ax.set_title(title)
-        self.lines = []
+        self.ax[0].plot([0, self.buffer_size-1],[0,0],"r--",label="Zero")
+        self.ax[0].set_ylim(sample_limits[0], sample_limits[1])
+        self.ax[0].set_title("Un-Filtered")
+        self.r_lines = []
+
+        # Filter Plot
+        self.ax[1].plot([0, self.buffer_size-1],[0,0],"r--",label="Zero")
+        self.ax[1].set_ylim(sample_limits[0], sample_limits[1])
+        self.ax[1].set_title("Filtered")
+        self.f_lines = []
 
         # Plot Buffers
         for i in range(channels):
-            self.buffers.append(RollingBuffer(self.buffer_size))
-            line, = self.ax.plot(self.buffers[i].update(), label=labels[i])
-            self.lines.append(line)
-        self.ax.legend()
+            self.r_buffers.append(RollingBuffer(self.buffer_size))
+            line, = self.ax[0].plot(self.r_buffers[i].update(), label=labels[i])
+            self.r_lines.append(line)
+            
+            self.f_buffers.append(RollingBuffer(self.buffer_size))
+            line, = self.ax[1].plot(self.f_buffers[i].update(), label=labels[i])
+            self.f_lines.append(line)
+        self.ax[1].legend(loc=4)
 
         self.anim = FuncAnimation(self.fig, self.update, interval=100)
         self.update_count = 0
 
         # Sample Rate
         self.sample_count = 0
-        self.label = self.ax.text(0, sample_limits[0], "Sample Rate: -", ha="left", va="bottom", fontsize=15)
+        self.label = self.ax[0].text(0, sample_limits[0], "Sample Rate: -", ha="left", va="bottom", fontsize=15)
         self.last = 0
 
     def update(self, x):
         # Buffer
-        for i in range(len(self.lines)):
-            self.lines[i].set_ydata(self.buffers[i].update())
+        for i in range(len(self.r_lines)):
+            self.r_lines[i].set_ydata(self.r_buffers[i].update())
+            self.f_lines[i].set_ydata(self.f_buffers[i].update())
         
         # Sample Rate Calc
         if self.update_count % 5 == 0: # Reduce updates for performance
@@ -66,10 +78,11 @@ class RealtimePlots:
             self.label.set_text(f"Fs: {sample_rate:.1f}Hz")
         self.update_count += 1
 
-    def addSample(self, v, channel=0):
+    def addSample(self, v, f, channel=0):
         if channel == 0:
             self.sample_count += 1
-        self.buffers[channel].add(v)
+        self.r_buffers[channel].add(v)
+        self.f_buffers[channel].add(f)
 
 """ Real-Time Vector Plotter """
 class RealtimeVectorPlot:
