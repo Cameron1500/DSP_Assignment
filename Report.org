@@ -16,6 +16,25 @@ calculate the impulse response of the filter and use the fft to determine the fr
 *** TODO Share/modify plotting code
 - standard resolution
 - a standard aspect ratio
+** Submission
+*** Submission Naming Convention
++ Allowed to include any other files in submission *aside from* data files (since code is supposed to run in real time)
+#+ATTR_LATEX: placement [H]
+#+caption: Submission File Naming Convention
+#+NAME: NamingConvention
+|----------------------------+------------------------------------|
+| report filename            | report.pdf                         |
+| real time demo python file | realtime_iir_main.py               |
+| IIR Class python file      | rununittest.py                     |
+| Zip filename               | iir_2704250F_2391317R_2531525S.zip |
+|----------------------------+------------------------------------|
+*** Pre Submission checklist [/]
+- [ ] final submission commit is made named "Final submission #n" where n is however long it takes us to get it right
+- [ ] all team participants pull this commit and extract the contents of the final commit zip to a directory of thier choosing
+- [ ] all team participants verify the [[*Submission  Naming Convention][Naming Convention]] of all files as well as the zip file itself
+- [ ] all participants must run the IIR Unit tests
+- [ ] If possible also run the real-time plotting code
+- [ ] verify content of report PDF is satisfactory
 ** Report Question 1
 *** TODO Discuss influence of filter cut-off freq [/]:Ben:NoExport:
 - [ ] compare rise time of different filter designs
@@ -28,6 +47,13 @@ calculate the impulse response of the filter and use the fft to determine the fr
 ** Report Question 3
 ** Report Question 4
 
+** Ideas
+*** IDEA use file links in submission dir
+Rather than copying and pasting all of the required files into the submission directory use links.
+Need to know:
+- [ ] does compression works with
+- [ ] how does git deal with such links
+- [ ] how do other peoples computers deal with such links
 
 * Table Of contents :TOC_3:NoExport:
 - [[#introduction][Introduction]]
