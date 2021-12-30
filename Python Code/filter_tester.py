@@ -1,35 +1,18 @@
 import matplotlib.pyplot as plt
+from scipy import signal
 import numpy as np
 
-def plot(data, labels, fs, title="", split = True):
-    fig, ax = plt.subplots(ncols=2)
-    N = len(data[0])
+import iir_filter
 
-    """ Data """
-    time = np.linspace(0, N/fs, N)
-    
-    ax[0].set_title(title)
-    ax[0].set_ylim(-5, 5)
-    for i in range(len(data)):
-        ax[0].plot(time, data[i], label=labels[i])
-    ax[0].legend()
+""" Constants """
+fs = 1000
+fn = fs / 2
 
-    """ FFT """
-    if split:
-        for i in range(len(data)):
-            data[i] = data[i][int(N/2):]
-    
-    shape = np.shape(data)
-    _fft = np.empty(shape=(shape[0], int(shape[1]/2)))
-    for i in range(len(data)):
-        data[i] = 20 * np.log10(abs(np.fft.fft(data[i])))
-        _fft[i] = data[i][:int(len(data[i])/2)]
-    
-    _fx = np.linspace(0, fs/2, len(_fft[0]))
+fc = 1
 
-    ax[1].set_title(title + " FFT")
-    for i in _fft:
-        ax[1].plot(_fx, i)
+test_freq = 10
+
+filter_order = 1
 
 """ Load Data """
 from pathlib import Path
