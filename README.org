@@ -1,4 +1,210 @@
-#+TITLE: UofG year 5 DSP Assignment 3
+#+TITLE: UofG Masters DSP Project
+#+INCLUDE: "~/.doom.d/orgReportHeader.org"
+* Foreword
+This is the source code for the masters year DSP project on real time IIR filtering at the university of Glasgow.
+This read-me is currently acting as a notebook for this project and should not be seen as documentation as such.
 
-* Accelerometer (GY-521)
--
+Note: Primarily these notes relate to the implementation of I2C in Firmata as well as the relevant registers of the MPU-6050 however it seems like this sensor will not be used in favour of the ADXL335 since getting I2C working with firmata is proving to be a nightmare. I will however leave my notes on the matter in here for future reference.
+
+* Table of Contents :TOC_3:noexport:
+- [[#foreword][Foreword]]
+- [[#reference-material][Reference Material]]
+- [[#esp-32-reference][ESP 32 Reference]]
+  - [[#pin-layout][Pin Layout]]
+- [[#sysex-command-syntax-i2c-ect][SYSEX Command Syntax (I2C ect)]]
+  - [[#aditional-notes][Aditional Notes]]
+    - [[#pyfirmata-expected-baudrate][Pyfirmata expected Baudrate]]
+  - [[#frimata-protocol-sysex-commands][Frimata protocol *SYSEX* Commands]]
+  - [[#sysex-i2c_request-i2c-request][SYSEX I2C_REQUEST (I2C request)]]
+    - [[#frimata-protocol-sysex-i2c_request-structure][Frimata protocol *SYSEX I2C_Request* structure]]
+    - [[#firmware-implementation][Firmware implementation]]
+    - [[#i2cfirmatacpp-implementation][*I2CFirmata.cpp* implementation:]]
+  - [[#sysex-i2c_reply-returned-data-structure][SYSEX I2C_REPLY Returned Data structure]]
+    - [[#returned-data-structure][Returned Data Structure]]
+    - [[#converting-back-from-7-bit-bytes][Converting back from 7 bit bytes]]
+- [[#mpu-6050][MPU 6050]]
+  - [[#mpu-6050-i2c][MPU-6050 I2C]]
+    - [[#i2c-address][I2C Address]]
+    - [[#sensor-data-registers][Sensor Data Registers]]
+
+* Reference Material
++ [[file:Refference/MPU-6000-Datasheet1.pdf][MPU-6000/6050 datasheet]]
++ [[file:Refference/MPU-6000-Register-Map1.pdf][MPU-6050/6050 Registers]]
++ [[file:Refference/iir_ass32.pdf][Assessment Sheet]]
+
+* ESP 32 Reference
+** Pin Layout
+From: [[https://circuits4you.com/2018/12/31/esp32-devkit-esp32-wroom-gpio-pinout/][PinLayout]]
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX:  :width 400
+[[file:Refference/ESP32-Pinout.jpg]]
+* SYSEX Command Syntax (I2C ect)
+** Aditional Notes
+*** Pyfirmata expected Baudrate
+| 57600 |
+** Frimata protocol *SYSEX* Commands
++ I2C_REPLY -> 119
++ I2C_REQUEST -> 118
++ REPORT_ANALOG -> 192
++ REPORT_Digital -> 208
++ QUERY_FIRMWARE -> 118
++ START_SYSEX -> 240
++ END-SYSEX -> 247
++ EXTEND_ANALOG-> 111
++ STRING_DATA -> 113
++ CAPABILITY_RESPONSE -> 108
++ SYSEX_NON_REALTIME -> 126
++ SYSEX_REALTIME -> 127
++ REPORT_FIRMWARE -> 121
++ SAMPLING_INTERVAL -> 122
++ REPORT_VERSION -> 249
+** SYSEX I2C_REQUEST (I2C request)
+Any *SYSEX* command is first handled by the *handleSysex* method which then conditionally routes *I2C_REQUEST* commands to the *handleI2CRequest* method of *I2CFirmata*
+*** Frimata protocol *SYSEX I2C_Request* structure
+From:[[github:firmata/protocol/blob/master/i2c.md]]
+0. START_SYSEX (0xF0)
+1. I2C_REQUEST (0x76        )
+2. slave address (LSB)
+3. slave address (MSB) + read/write and address mode bits
+     - {bit 7: always 0}
+     - {bit 6: auto restart transmission, 0 = stop (default), 1 = restart}
+     - {bit 5: address mode, 1 = 10-bit mode}
+     - {bits 4-3: read/write, 00 = write, 01 = read once, 10 = read continuously, 11 = stop reading}
+     - {bits 2-0: slave address MSB in 10-bit mode, not used in 7-bit mode}
+4.   data 0 (Target slave register LSB)
+5.   data 0 (Target slave register MSB)
+6.   data 1 (Number of bytes to extract LSB)
+7.   data 1 (Number of bytes to extract MSB)
+
+*** Firmware implementation
+As far as I can tell, all I2C sensor data requested via *SYSEX* command is handled in the same way by the same method on the firmware side (*readAndReportData*). This means, that there is no way to tell which I2C reply is which unless you have only just sent a single request.
+
+Note: all data buffers handled by this and other functions prior to sending are handled as simple byte arrays conversion to 7 bit bytes is handled in the *sendSysex* method
+
+*I2CFirmata.cpp* implementation:
+#+begin_src C++
+void I2CFirmata::report(bool elapsed)
+{
+// report i2c data for all device with read continuous mode enabled
+if (queryIndex > -1) {
+    for (byte i = 0; i < queryIndex + 1; i++) {
+    readAndReportData(query[i].addr, query[i].reg, query[i].bytes, query[i].stopTX);
+    }
+}
+}
+#+end_src
+*** *I2CFirmata.cpp* implementation:
+#+begin_src C++
+void I2CFirmata::handleI2CRequest(byte argc, byte* argv)
+{
+  byte mode;
+  byte stopTX;
+  byte slaveAddress;
+  byte data;
+  int slaveRegister;
+  mode = argv[1] & I2C_READ_WRITE_MODE_MASK;
+  if (argv[1] & I2C_10BIT_ADDRESS_MODE_MASK) {
+    Firmata.sendString(F("10-bit addressing not supported"));
+    return;
+  }
+  else {
+    slaveAddress = argv[0];
+  }
+
+  // need to invert the logic here since 0 will be default for client
+  // libraries that have not updated to add support for restart tx
+  if (argv[1] & I2C_END_TX_MASK) {
+    stopTX = I2C_RESTART_TX;
+  }
+  else {
+    stopTX = I2C_STOP_TX; // default
+  }
+
+  switch (mode) {
+      ... // more here
+  case I2C_READ:
+    if (argc == 6) {
+      // a slave register is specified
+      slaveRegister = argv[2] + (argv[3] << 7);
+      data = argv[4] + (argv[5] << 7);  // bytes to read
+    }
+    else {
+      // a slave register is NOT specified
+      slaveRegister = I2C_REGISTER_NOT_SPECIFIED;
+      data = argv[2] + (argv[3] << 7);  // bytes to read
+    }
+    readAndReportData(slaveAddress, (int)slaveRegister, data, stopTX);
+    break;
+  case I2C_READ_CONTINUOUSLY:
+    if ((queryIndex + 1) >= I2C_MAX_QUERIES) {
+      // too many queries, just ignore
+      Firmata.sendString(F("too many queries"));
+      break;
+    }
+    if (argc == 6) {
+      // a slave register is specified
+      slaveRegister = argv[2] + (argv[3] << 7);
+      data = argv[4] + (argv[5] << 7);  // bytes to read
+    }
+    else {
+      // a slave register is NOT specified
+      slaveRegister = (int)I2C_REGISTER_NOT_SPECIFIED;
+      data = argv[2] + (argv[3] << 7);  // bytes to read
+    }
+    queryIndex++;
+    query[queryIndex].addr = slaveAddress;
+    query[queryIndex].reg = slaveRegister;
+    query[queryIndex].bytes = data;
+    query[queryIndex].stopTX = stopTX;
+    break;
+    ...// more here
+#+end_src
+** SYSEX I2C_REPLY Returned Data structure
+Data returned from an I2C request is always Prefixed with the *SYSEX* command: *SYSEX_I2C_REPLY*
+*** Returned Data Structure
+From:
+0.  START_SYSEX (0xF0)
+1.  I2C_REPLY (0x77)
+2.  slave address (LSB)
+3.  slave address (MSB)
+4.  register (LSB)
+5.  register (MSB)
+6.  data 0 (LSB) - presumably the contents of the register
+7.  data 0 (MSB)
+*** Converting back from 7 bit bytes
+The payload is always preceded with a *SYSEX* command header. This is NOT in a 7 bit form. The subsequent message payload however is.
+The *sendSysex* method of the Firmata firmware packages each byte of payload data as two 7 bit bytes.
+* MPU 6050
+** MPU-6050 I2C
+*** I2C Address
+This depends on how the AD0 of the MPU 6050 is set.
+| AD0 = 0 | AD0 = 1 |
+|---------+---------|
+| 1101000 | 1101001 |
+I believe on the sparkfun breakout board AD0 = 0
+*** Sensor Data Registers
+From:[[file:Refference/MPU-6000-Register-Map1.pdf][MPU-6050 Register Datasheet]]
+**** Accelerometer
+- MPU 60X0 Registers Pg 29.
+- 16 bit twos complement
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX:  :width 400
+[[file:Refference/AccelRegister.png]]
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX:  :width 400
+[[file:Refference/AccelSensitivity.png]]
+**** Gyroscope
+- MPU 60X0 Registers Pg 31.
+- 16 bit twos complement
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX:  :width 400
+[[file:Refference/GyroRegister.png]]
+**** Temp sensor
+- MPU 60X0 Registers Pg 31.
+- 16 bit signed value
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX:  :width 400
+[[file:Refference/TempRegister.png]]
+Temp Formula:
+\(T_{deg C} = (T_{Reg})/340 +36.53\)

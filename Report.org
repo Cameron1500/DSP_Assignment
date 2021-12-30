@@ -1,0 +1,43 @@
+#+TITLE: DSP Assignment 3 IIR filtering Report
+
+* Project Notes :NoExport:
+** Project to-dos:
+*** TODO Add real-time angle measurements to plot [0/2] :Ben:
+- [X] write code to calc angle
+- [X] integrate into real-time plot
+- [X] write test
+- [ ] Have Cameron Check angle code with working accelerometer
+*** TODO Get latex pdf compilation working [2/3] :Ben:
+- [X] instal tex package
+- [X] setup ORG doc for export
+- [-] Copy in source code
+*** TODO add a filter unit test in the frequency domain
+calculate the impulse response of the filter and use the fft to determine the frequency response
+*** TODO Share/modify plotting code
+- standard resolution
+- a standard aspect ratio
+** Report Question 1
+*** TODO Discuss influence of filter cut-off freq [/]:Ben:NoExport:
+- [ ] compare rise time of different filter designs
+- [ ] discuss importance of rise time of the impulse response
+*** TODO Create a data-flow diagram of the entire filter [/]:Ben:Peter:
+- [ ] get tkiz working
+- [ ] include final filter designs as tables referring to the symbolic variables defined in the data-flow diagram
+*** TODO Alter the IIR DFD to just having symbolic coefficients :Peter:
+** Report Question 2
+** Report Question 3
+** Report Question 4
+
+
+* Table Of contents :TOC_3:NoExport:
+- [[#introduction][Introduction]]
+- [[#question-1][Question 1]]
+- [[#question-2][Question 2]]
+- [[#question-3][Question 3]]
+- [[#question-4][Question 4]]
+
+* Introduction
+* Question 1
+* Question 2
+* Question 3
+* Question 4
