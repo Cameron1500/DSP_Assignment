@@ -1,31 +1,28 @@
 #+TITLE: DSP Assignment 3 IIR filtering Report
-
+#+INCLUDE: "~/.doom.d/orgReportHeader.org"
 * Project Notes :NoExport:
 ** Project to-dos:
-*** TODO Add real-time angle measurements to plot [0/2] :Ben:
+*** DONE Add real-time angle measurements to plot [4/4] :Ben:
 - [X] write code to calc angle
 - [X] integrate into real-time plot
 - [X] write test
-- [ ] Have Cameron Check angle code with working accelerometer
-*** TODO Get latex pdf compilation working [2/3] :Ben:
+- [X] Have Cameron Check angle code with working accelerometer
+*** DONE Get latex pdf compilation working [3/3] :Ben:
 - [X] instal tex package
 - [X] setup ORG doc for export
-- [-] Copy in source code
-*** TODO add a filter unit test in the frequency domain
-calculate the impulse response of the filter and use the fft to determine the frequency response
-*** TODO Share/modify plotting code
+- [X] Copy in source code
+*** DONE Share/modify plotting code
 - standard resolution
 - a standard aspect ratio
 *** TODO write report
 ** Report TODOs:
-*** TODO Investigate the influence of filter cut-off freq [1/4]:Ben:NoExport:
+*** WAIT Investigate the influence of filter cut-off freq [1/4] :Ben:NoExport:
 - [X] compare rise time of different filter designs
 - [-] do an FFT of the Prerecorded filter signal to determine the frequency of the sensor noise
-- [ ] do fft of a pre-recorded gesture to see what frequencies are present
-- [ ] discuss importance of rise time of the impulse response
-*** DONE Create a data-flow diagram of the entire filter [0/2]:Ben:Peter:
-- [ ] get tkiz working
-- [ ] include final filter designs as tables referring to the symbolic variables defined in the data-flow diagram
+- [-] do fft of a pre-recorded gesture to see what frequencies are present
+- [-] discuss importance of rise time of the impulse response
+*** DONE Create a data-flow diagram of the entire filter [1/1]:Ben:Peter:
+- [X] include final filter designs as tables referring to the symbolic variables defined in the data-flow diagram
 *** DONE Alter the IIR DFD to just having symbolic coefficients :Peter:
 ** links
 + [[https://docs.google.com/document/d/1Gv__na6-vi4wufCiEbUu9OTStYp5bxbVrcjlQLGNuso/edit][Report Google Doc]]
@@ -38,6 +35,7 @@ Need to know:
 - [ ] how do other peoples computers deal with such links
 *** IDEA unit test in the frequency domain
 - check the filter function and the filter design method in one foul swoop by interrogating the fft of a filter impulse response
+*** IDEA do tilt sensor dataflow diagram using Tkiz
 
 ** Submission
 *** Submission Naming Convention
@@ -61,12 +59,12 @@ Need to know:
 
 * Table Of contents :TOC_3:NoExport:
 - [[#introduction][Introduction]]
-- [[#question-1][Question 1]]
 - [[#working-principles][Working Principles]]
 - [[#filter-design][Filter design]]
   - [[#sensor-noise][Sensor noise]]
   - [[#settling-time][Settling Time]]
 - [[#implementation][Implementation]]
+- [[#results][Results]]
 - [[#appendices][Appendices]]
 
 * Introduction
@@ -74,20 +72,44 @@ Need to know:
 - [ ] Present the problem
 - [ ] describe the working principles of an accelerometer Bases tilt sensor
 :END:
-* Question 1
-** TODO Write Report Question 1 [0/6] :NoExport:
 
 * Working Principles
 :notes:
-- [ ] data flow diagrams
-- [ ] justify filter design requirements
+- [ ] high level data flow diagrams
 :END:
 * Filter design
 :notes:
+- [ ] justify filter design requirements
+- [ ] filter dataflow diagram + discuss
 - [ ] discuss/ justify filter design methods
-- [ ] link to youtube video
+  + butter-worth filter Scipy. Include code?
+  + second order
+  + No cascading required? - we don't need steep cutoff
+  + also we want the code to execute as fast as possible (IIR Ideal for this application)
+- [ ] discuss importance of rise time as a metric for "responsiveness"
+- [ ] figure of harmonic content
+- [ ] figure of impulse response
 :END:
 ** Sensor noise
 ** Settling Time
 * Implementation
+:notes:
+- [ ] discuss how sample rate was checked
+- [ ] discuss unit testing
+  + include here the tables of filter coefficients used (refer to dataflow diagram)
+- [ ] maybe discuss how angle measurements were derived
+- [ ] present images of the setup
+:END:
+* Results
+:notes:
+- [ ] present plot of the raw vs filtered data
+- [ ] link to youtube video
+- [ ] with reference to the youtube video
+:END:
 * Appendices
+:notes:
+- [ ] include unit test code
+- [ ] include links section:
+  + the git repo
+  + the youtube video
+:END:
