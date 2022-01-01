@@ -16,6 +16,19 @@ calculate the impulse response of the filter and use the fft to determine the fr
 *** TODO Share/modify plotting code
 - standard resolution
 - a standard aspect ratio
+*** TODO write report
+** Report TODOs:
+*** TODO Investigate the influence of filter cut-off freq [1/4]:Ben:NoExport:
+- [X] compare rise time of different filter designs
+- [-] do an FFT of the Prerecorded filter signal to determine the frequency of the sensor noise
+- [ ] do fft of a pre-recorded gesture to see what frequencies are present
+- [ ] discuss importance of rise time of the impulse response
+*** DONE Create a data-flow diagram of the entire filter [0/2]:Ben:Peter:
+- [ ] get tkiz working
+- [ ] include final filter designs as tables referring to the symbolic variables defined in the data-flow diagram
+*** DONE Alter the IIR DFD to just having symbolic coefficients :Peter:
+** links
++ [[https://docs.google.com/document/d/1Gv__na6-vi4wufCiEbUu9OTStYp5bxbVrcjlQLGNuso/edit][Report Google Doc]]
 ** Ideas
 *** IDEA use file links in submission dir
 Rather than copying and pasting all of the required files into the submission directory use links.
@@ -23,6 +36,8 @@ Need to know:
 - [ ] does compression works with
 - [ ] how does git deal with such links
 - [ ] how do other peoples computers deal with such links
+*** IDEA unit test in the frequency domain
+- check the filter function and the filter design method in one foul swoop by interrogating the fft of a filter impulse response
 
 ** Submission
 *** Submission Naming Convention
@@ -43,29 +58,36 @@ Need to know:
 - [ ] all participants must run the IIR Unit tests
 - [ ] If possible also run the real-time plotting code
 - [ ] verify content of report PDF is satisfactory
-** Report Question 1
-*** TODO Investigate the influence of filter cut-off freq [1/4]:Ben:NoExport:
-- [X] compare rise time of different filter designs
-- [-] do an FFT of the Prerecorded filter signal to determine the frequency of the sensor noise
-- [ ] do fft of a pre-recorded gesture to see what frequencies are present
-- [ ] discuss importance of rise time of the impulse response
-*** TODO Create a data-flow diagram of the entire filter [/]:Ben:Peter:
-- [ ] get tkiz working
-- [ ] include final filter designs as tables referring to the symbolic variables defined in the data-flow diagram
-*** TODO Alter the IIR DFD to just having symbolic coefficients :Peter:
-** Report Question 2
-** Report Question 3
-** Report Question 4
 
 * Table Of contents :TOC_3:NoExport:
 - [[#introduction][Introduction]]
 - [[#question-1][Question 1]]
-- [[#question-2][Question 2]]
-- [[#question-3][Question 3]]
-- [[#question-4][Question 4]]
+- [[#working-principles][Working Principles]]
+- [[#filter-design][Filter design]]
+  - [[#sensor-noise][Sensor noise]]
+  - [[#settling-time][Settling Time]]
+- [[#implementation][Implementation]]
+- [[#appendices][Appendices]]
 
 * Introduction
+:notes:
+- [ ] Present the problem
+- [ ] describe the working principles of an accelerometer Bases tilt sensor
+:END:
 * Question 1
-* Question 2
-* Question 3
-* Question 4
+** TODO Write Report Question 1 [0/6] :NoExport:
+
+* Working Principles
+:notes:
+- [ ] data flow diagrams
+- [ ] justify filter design requirements
+:END:
+* Filter design
+:notes:
+- [ ] discuss/ justify filter design methods
+- [ ] link to youtube video
+:END:
+** Sensor noise
+** Settling Time
+* Implementation
+* Appendices
