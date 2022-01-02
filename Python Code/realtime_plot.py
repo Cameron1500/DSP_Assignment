@@ -117,19 +117,18 @@ class RealtimeVectorPlot:
         self.button.on_clicked(self.setOffset)
 
     def update(self, x):
-        cur_vec = self.vec
-        m = np.sqrt(cur_vec[0] * cur_vec[0] + cur_vec[1] * cur_vec[1] + cur_vec[2] * cur_vec[2])
+        m = np.sqrt(self.vec[0] * self.vec[0] + self.vec[1] * self.vec[1] + self.vec[2] * self.vec[2])
         if m != 0:
             self.q.remove()
-            self.q = self.ax.quiver(0, 0, 0, cur_vec[0] / m, cur_vec[1] / m, cur_vec[2] / m, color="black")
+            self.q = self.ax.quiver(0, 0, 0, self.vec[0] / m, self.vec[1] / m, self.vec[2] / m, color="black")
 
             # Angle Calcs
             if self.update_delay % 5 == 0:
                 # Angle between the vector and the x plane
-                angle = calcAngles(cur_vec)
-                ma = f"Real Angle (deg),   x: {angle[0]:.1f}, y: {angle[1]:.1f}, z: {angle[2]:.1f}\n"
+                angle = calcAngles(self.vec)
+                ma = f"Measured Angles (deg), x: {angle[0]:.1f}, y: {angle[1]:.1f}, z: {angle[2]:.1f}\n"
                 angle = np.abs(angle - self.offset_angles)
-                fa = f"Final Angle (deg),  x: {angle[0]:.1f}, y: {angle[1]:.1f}, z: {angle[2]:.1f}"
+                fa = f"Final Angle (deg):  {angle[2]:.1f}"
                 self.label.set_text(ma + fa)
             self.update_delay += 1
 
