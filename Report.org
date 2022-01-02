@@ -6,6 +6,13 @@
 *** TODO create before and after filtering plots :Ben:
 - [ ] create plotting script
 - [ ] discussion in report
+*** TODO document setup [0/3] :Cammeron:
+- [ ] create video of setup and upload to youtube
+- [ ] take picture of setup and commit to figures
+- [ ] take picture with protractor and commit
+*** TODO take recording of accelerometer at steady state [/] :Cammeron:
+- [ ] take long accelerometer recording of the accelerometer at rest
+- [ ] commit
 *** DONE Add real-time angle measurements to plot [4/4] :Ben:
 - [X] write code to calc angle
 - [X] integrate into real-time plot
@@ -15,13 +22,14 @@
 - [X] instal tex package
 - [X] setup ORG doc for export
 - [X] Copy in source code
-*** DONE Share/modify plotting code
-- standard resolution
-- a standard aspect ratio
+*** DONE Share/modify plotting code :Ben:
+- [X] standard resolution
+- [X] a standard aspect ratio
 ** Report TODOs:
-*** WAIT Investigate the influence of filter cut-off freq [1/4] :Ben:NoExport:
+*** WAIT Investigate the influence of filter cut-off freq [1/5] :Ben:NoExport:
 - [X] compare rise time of different filter designs
 - [-] do an FFT of the Prerecorded filter signal to determine the frequency of the sensor noise
+- [ ] do a polynomial fit to remove dc component
 - [-] do fft of a pre-recorded gesture to see what frequencies are present
 - [-] discuss importance of rise time of the impulse response
 *** DONE Create a data-flow diagram of the entire filter [1/1]:Ben:Peter:
@@ -39,6 +47,9 @@ Need to know:
 *** IDEA unit test in the frequency domain
 - check the filter function and the filter design method in one foul swoop by interrogating the fft of a filter impulse response
 *** IDEA do tilt sensor dataflow diagram using Tkiz
+*** IDEA influence of dc leakage on sensor noise measurement
+- [ ] eliminate using time-domain first order polynomial fit
+- [ ] discuss dc-link leakage
 
 ** Submission
 *** Submission Naming Convention
@@ -63,10 +74,18 @@ Need to know:
 * Table Of contents :TOC_3:noexport:
 - [[#introduction][Introduction]]
 - [[#working-principles][Working Principles]]
-- [[#filter-design][Filter design]]
+- [[#filter-design-objectives][Filter design objectives]]
   - [[#sensor-noise][Sensor noise]]
+  - [[#procedure-for-quantifying-sensor-noise][Procedure for Quantifying sensor noise]]
+  - [[#harmonic-content-due-to-sensor-movement][Harmonic content due to sensor movement]]
   - [[#settling-time][Settling Time]]
+  - [[#influence-of-filter-order][influence of Filter order]]
+  - [[#final-design][Final design]]
 - [[#implementation][Implementation]]
+  - [[#filter-design][Filter design]]
+  - [[#filter-unit-testing][Filter Unit Testing]]
+  - [[#sample-rate-verification][Sample rate Verification]]
+  - [[#angle-measurement][Angle measurement]]
 - [[#results][Results]]
 - [[#design-review][Design Review]]
 - [[#future-work][Future work]]
@@ -79,32 +98,79 @@ Need to know:
     - [[#realtime_iir_mainpy-1][realtime_iir_main.py]]
     - [[#realtime_plotpy][realtime_plot.py]]
   - [[#links][Links]]
+    - [[#project-source-code][Project Source code]]
+    - [[#filter-source-code][Filter Source code]]
+    - [[#project-demonstration-youtube-video][Project demonstration YouTube Video]]
 
 * Introduction
 :notes:
 - [ ] Present the problem
 - [ ] describe the working principles of an accelerometer Bases tilt sensor
+- [ ] design objectives
 :END:
 
 * Working Principles
 :notes:
 - [ ] high level data flow diagrams
 :END:
-* Filter design
+* Filter design objectives :Ben:
 :notes:
 - [ ] justify filter design requirements
+  + translate the high-level project design objectives into filter design objectives
+- [ ] discuss key design metrics
+  + [ ] discuss importance of rise time as a metric for "responsiveness"
 - [ ] filter dataflow diagram + discuss
-- [ ] discuss/ justify filter design methods
-  + butter-worth filter Scipy. Include code?
-  + second order
-  + No cascading required? - we don't need steep cutoff
-  + also we want the code to execute as fast as possible (IIR Ideal for this application)
-- [ ] discuss importance of rise time as a metric for "responsiveness"
-- [ ] figure of harmonic content
-- [ ] figure of impulse response
+- [ ] present discuss final design objective for filter design stage
+  + cutoff frequency
+    - ??
+  + filter type
+    - Butterworth
+    - because??
+  + order
+    - second order?
+    - no cascading because we only want a lowpass response
+    - because we want our code to execute as fast as possible
+    - we are not as concerned about steep cutoffs
 :END:
-** Sensor noise
-** Settling Time
+** Sensor noise :Ben:
+:notes:
+- [ ] discuss noise in accelerometers in general
+- [ ] potential additional noise sources (ADCs/EMF)
+- [ ] mention that noise tends to be relatively speaking higher frequency and uniformly distributed in the frequency domain
+:END:
+** Procedure for Quantifying sensor noise :Ben:
+:notes:
+- [ ] present approach for quantifying noise
+- [ ] discuss problems due to dc spectral leakage
+- [ ] eliminate using time-domain first order polynomial fit
+:END:
+** Harmonic content due to sensor movement :Ben:
+:notes:
+- [ ] we want to reject this
+- [ ] discuss how sensor motion will disturb the measurement of angle
+- [ ] (present figure) show the harmonic content of the sensor under motion vs at rest
+  + comparison plots should be at the same sample rate and length (can be achieved by cropping the longer "at rest" recording)
+  + identify and comment on the frequency range of these harmonics
+- [ ] comment on the trade off between settling time and rejection of noise/ disturbances and settling time
+- [ ] lower priority than sensor noise
+:END:
+** Settling Time :Ben:
+:notes:
+- [ ] discuss how settling time is a metric for responsiveness
+- [ ] point out the fundamental 2 between filter cutoff frequency and
+:END:
+** influence of Filter order :Ben:
+:notes:
+- [ ] Filter order directly influences the maximum achievable transition width
+- [ ] Attenuation after the cuttof is not an important metric since disturbances are transient and noise is flatly distributed
+- [ ] As the cuttof tends towards lower frequencies, the relative "flatness" of the pass-band is diminished resulting in exponential increase in settling time for a given increase in frequency
+- [ ] Present plot showing different filter orders
+- [ ] transition width becomes important because it also affects settling time
+- [ ] It is effectively a free degree of freedom that allows a limited improvement to settling time at the cost of additional computation
+- [ ] only important when cutoff frequency bottoms out
+:END:
+** Final design :Ben:
+
 * Implementation
 :notes:
 - [ ] discuss how sample rate was checked
@@ -113,12 +179,21 @@ Need to know:
 - [ ] maybe discuss how angle measurements were derived
 - [ ] present images of the setup
 :END:
+** Filter design
+:notes:
+- [ ] just a brief overview of the high-level design commands used
+- [ ] Reiterate the cutoff frequency decided above
+:END:
+** Filter Unit Testing :Cammeron:
+** Sample rate Verification :Cammeron:
+** Angle measurement :Ben:
 * Results
 :notes:
 Treat this section as presentation of results
 - [ ] present plot of the raw vs filtered data
+- [-] discuss the achieved sample rate
 - [ ] link to youtube video
-- [ ] with reference to the youtube video
+- [ ] with reference to the youtube video + cammeron's pics with the protractor discuss success
 :END:
 * Design Review
 :notes:
@@ -157,3 +232,8 @@ Treat this section as presentation of results
 *** realtime_plot.py
 #+INCLUDE: "Python Code/realtime_plot.py" src python :lines ""
 ** Links
+*** [[https://github.com/Cameron1500/DSP_Assignment][Project Source code]] :Ben:
+# our repo
+*** [[https://github.com/berndporr/py-iir-filter][Filter Source code]] :Ben:
+# bernds repo
+*** Project demonstration YouTube Video :Cammeron:
