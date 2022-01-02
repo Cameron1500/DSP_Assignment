@@ -1,9 +1,13 @@
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
+from matplotlib.widgets import Button
 import matplotlib.pyplot as plt
+
 import numpy as np
 import time
-import calcAngles
+
+from calcAngles import calcAngles
+
 """ Rolling Buffer """
 class RollingBuffer:
     def __init__(self, size):
@@ -103,23 +107,34 @@ class RealtimeVectorPlot:
         self.y = self.ax.quiver(0, 0, 0, 0, 1 ,0, color="green")
         self.z = self.ax.quiver(0, 0, 0, 0, 0 ,1, color="blue")
 
-        self.tLastUpdate = 0
-        self.updatePeriod_s = 1
         self.label = self.ax.text(0, 0, 0, "test", transform=self.ax.transAxes)
-        self.angle = np.array([0,0,0])
+        self.update_delay = 0
+
+        # For calibration
+        self.offset_angles = np.zeros(3)
+        axes = plt.axes([0.81, 0.05, 0.1, 0.075])
+        self.button = Button(axes, "Calibrate")
+        self.button.on_clicked(self.setOffset)
 
     def update(self, x):
-        m = np.max(np.abs(self.vec))
+        cur_vec = self.vec
+        m = np.sqrt(cur_vec[0] * cur_vec[0] + cur_vec[1] * cur_vec[1] + cur_vec[2] * cur_vec[2])
         if m != 0:
             self.q.remove()
-            self.q = self.ax.quiver(0, 0, 0, self.vec[0] / m, self.vec[1] / m, self.vec[2] / m, color="black")
-            #angle calcs
-            now = time.time()
-            if (now - self.tLastUpdate)>self.updatePeriod_s:
-                #angle between the vector and the x plane
-                self.angle = calcAngles.calcAngles(self.vec)
-                self.label.set_text(f"angle (deg) x:{self.angle[0]}, y:{self.angle[1]}, z:{self.angle[2]}")
-                self.tLastUpdate = now
+            self.q = self.ax.quiver(0, 0, 0, cur_vec[0] / m, cur_vec[1] / m, cur_vec[2] / m, color="black")
+
+            # Angle Calcs
+            if self.update_delay % 5 == 0:
+                # Angle between the vector and the x plane
+                angle = calcAngles(cur_vec)
+                ma = f"Real Angle (deg),   x: {angle[0]:.1f}, y: {angle[1]:.1f}, z: {angle[2]:.1f}\n"
+                angle = np.abs(angle - self.offset_angles)
+                fa = f"Final Angle (deg),  x: {angle[0]:.1f}, y: {angle[1]:.1f}, z: {angle[2]:.1f}"
+                self.label.set_text(ma + fa)
+            self.update_delay += 1
+
+    def setOffset(self, x):
+        self.offset_angles = calcAngles(self.vec)
 
     def addSample(self, v, channel=0):
         self.vec[channel] = v
