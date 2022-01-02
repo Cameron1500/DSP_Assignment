@@ -6,3 +6,7 @@
 /README.toc
 /_minted-README.tex/
 /_minted-README/
+*.aux
+*.toc
+/_minted-Report/
+*.log

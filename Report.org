@@ -1,7 +1,11 @@
 #+TITLE: DSP Assignment 3 IIR filtering Report
 #+INCLUDE: "~/.doom.d/orgReportHeader.org"
-* Project Notes :NoExport:
+* Project Notes :noexport:
 ** Project to-dos:
+*** TODO write report :Ben:Peter:Cammeron:
+*** TODO create before and after filtering plots :Ben:
+- [ ] create plotting script
+- [ ] discussion in report
 *** DONE Add real-time angle measurements to plot [4/4] :Ben:
 - [X] write code to calc angle
 - [X] integrate into real-time plot
@@ -14,7 +18,6 @@
 *** DONE Share/modify plotting code
 - standard resolution
 - a standard aspect ratio
-*** TODO write report
 ** Report TODOs:
 *** WAIT Investigate the influence of filter cut-off freq [1/4] :Ben:NoExport:
 - [X] compare rise time of different filter designs
@@ -57,7 +60,7 @@ Need to know:
 - [ ] If possible also run the real-time plotting code
 - [ ] verify content of report PDF is satisfactory
 
-* Table Of contents :TOC_3:NoExport:
+* Table Of contents :TOC_3:noexport:
 - [[#introduction][Introduction]]
 - [[#working-principles][Working Principles]]
 - [[#filter-design][Filter design]]
@@ -65,7 +68,17 @@ Need to know:
   - [[#settling-time][Settling Time]]
 - [[#implementation][Implementation]]
 - [[#results][Results]]
+- [[#design-review][Design Review]]
+- [[#future-work][Future work]]
+- [[#conclusion][conclusion]]
 - [[#appendices][Appendices]]
+  - [[#code][Code]]
+    - [[#realtime_iir_mainpy][realtime_iir_main.py]]
+    - [[#rununittestpy][rununittest.py]]
+    - [[#calcanglespy][calcAngles.py]]
+    - [[#realtime_iir_mainpy-1][realtime_iir_main.py]]
+    - [[#realtime_plotpy][realtime_plot.py]]
+  - [[#links][Links]]
 
 * Introduction
 :notes:
@@ -102,9 +115,27 @@ Need to know:
 :END:
 * Results
 :notes:
+Treat this section as presentation of results
 - [ ] present plot of the raw vs filtered data
 - [ ] link to youtube video
 - [ ] with reference to the youtube video
+:END:
+* Design Review
+:notes:
+- [ ] discuss limitations
+  + influence of sample rate on cutoff frequency
+:END:
+* Future work
+:notes:
+- [ ] improvements
+  + [ ] have the filter design recalculate based on average sample-rate
+  + [ ] more instantaneous response using a gyroscope + sensor fusion
+:END:
+* conclusion
+:notes:
+- [ ] challenges faced
+  + [ ] problems with firmatta I2C (documented progress)
+- [ ] reiterate that we were successful
 :END:
 * Appendices
 :notes:
@@ -112,4 +143,17 @@ Need to know:
 - [ ] include links section:
   + the git repo
   + the youtube video
+  + link to bernds source code
 :END:
+** Code
+*** realtime_iir_main.py
+#+INCLUDE: "Python Code/realtime_iir_main.py" src python :lines ""
+*** rununittest.py
+#+INCLUDE: "Python Code/rununittest.py" src python :lines ""
+*** calcAngles.py
+#+INCLUDE: "Python Code/calcAngles.py" src python :lines ""
+*** realtime_iir_main.py
+#+INCLUDE: "Python Code/realtime_iir_main.py" src python :lines ""
+*** realtime_plot.py
+#+INCLUDE: "Python Code/realtime_plot.py" src python :lines ""
+** Links

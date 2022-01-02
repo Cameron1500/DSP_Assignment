@@ -14,7 +14,7 @@ def calcAngles(vec, DoDebug=False):
     for i in range(3):
         if DoDebug:
             print(f"unitVec{i} = {referenceFrame[i]}")
-        part1=np.dot(vec,referenceFrame[i])/(ln.norm(vec)*ln.norm(referenceFrame[i]))
+        part1=np.dot(vec,referenceFrame[i])/ (ln.norm(vec)*ln.norm(referenceFrame[i]))
         angle1 = np.arccos(part1)
         angle[i] = np.rad2deg(angle1)
         #angle1 = np.arcsin(abs(vec[i])/np.linalg.norm(vec))
@@ -22,7 +22,6 @@ def calcAngles(vec, DoDebug=False):
         if DoDebug:
             print(f"angle[{i}] = {angle[i]}")
     return angle
-
 
 
 ###################### Tests ################################
