@@ -11,10 +11,11 @@ import iir_filter as iir
 fs = 1000   # Max 1000
 # Nyquist
 fn = fs / 2
+fc = 5
 
 """ IIR Filter Design """
 # Noise Removal
-sos = signal.butter(1, 1 / fn, "lowpass", output="sos")
+sos = signal.butter(1, fc / fn, "lowpass", output="sos")
 
 x_filter = iir.IIR_filter(sos)
 y_filter = iir.IIR_filter(sos)
