@@ -26,13 +26,13 @@ orientation_plot = rtp.RealtimeVectorPlot()
 
 """ Convert Normalized Voltage to Acceleration """
 def v2a(n_volt):
-    # Normalised voltage to voltage and Re-centre (3.3V / 2 = 0g)
-    volts = (n_volt * 5) - (3.3 / 2)
-    # Convert to acceleration (300mV per g)
-    return volts / 0.3
+    return ((n_volt * 5) / 3.3) / 0.3
 
 """ Sample Process Function """
 def addX(data):
+    # Zeroing from measurements
+    data -=0.335
+
     acc = v2a(data)
     f_acc = x_filter.filter(acc)
 
@@ -40,6 +40,9 @@ def addX(data):
     orientation_plot.addSample(f_acc, channel=0)
 
 def addY(data):
+    # Zeroing from measurements
+    data -= 0.340
+
     acc = v2a(data)
     f_acc = y_filter.filter(acc)
 
@@ -47,6 +50,9 @@ def addY(data):
     orientation_plot.addSample(f_acc, channel=1)
 
 def addZ(data):
+    # Zeroing from measurements
+    data -= 0.340
+
     acc = v2a(data)
     f_acc = z_filter.filter(acc)
 
