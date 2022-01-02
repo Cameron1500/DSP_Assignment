@@ -6,11 +6,11 @@ import numpy.linalg as ln
 
 def calcAngles(vec, DoDebug=False):
     """returns the angles of a 3d vector relative to the orthoginal unit vectors"""
-    angle = np.array([0,0,0])
+    angle = np.zeros(3)
     referenceFrame = []
-    referenceFrame.append([1,0,0])
-    referenceFrame.append([0,1,0])
-    referenceFrame.append([0,0,1])
+    referenceFrame.append([1.0,0.0,0.0])
+    referenceFrame.append([0.0,1.0,0.0])
+    referenceFrame.append([0.0,0.0,1.0])
     for i in range(3):
         if DoDebug:
             print(f"unitVec{i} = {referenceFrame[i]}")
