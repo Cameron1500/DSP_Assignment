@@ -17,7 +17,7 @@ filterOrd = 1
 figuresRelPath = "Figures/" # figures dir relative to the project root
 saveNames = ["filterDesign_ImpulseResp.png","filterDesign_SettleTimeVsFc.png"]
 doSave = True
-doShow= False
+doShow=True
 ####### enable Tex rendering ########################
 plt.rcParams.update({
     "text.usetex": True,
@@ -66,7 +66,7 @@ plt.figure(0,figsize=(10,5))
 colors = plt.cm.gist_rainbow(np.linspace(0, 1, ntraces))
 idx= 0
 for fc in fc2test:
-    sos.insert(idx,signal.butter(filterOrd, fc / fn, "lowpass", output="sos"))
+    sos.insert(idx,signal.bessel(filterOrd, fc / fn, "lowpass", output="sos", norm="mag"))
     testSignal = testFilter(sos[idx], step)
     if testSignal[-1]<settledThresh: # if the last val < thresh interp wont work
         settlingTime[idx] = np.inf
