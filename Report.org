@@ -1,5 +1,7 @@
 #+TITLE: DSP Assignment 3 IIR filtering Report
 #+INCLUDE: "~/.doom.d/orgReportHeader.org"
+#+EMAIL: 2531525S@student.gla.ac.uk, 2704250F@student.gla.ac.uk, 2391317R@student.gla.ac.uk
+#+AUTHOR: Partheepan Shiyamsunthar, Benjamin Frazer, Cameron Richards
 * Project Notes :noexport:
 ** Project to-dos:
 *** TODO write report :Ben:Peter:Cammeron:
@@ -80,7 +82,7 @@ Need to know:
 - [[#filter-design-objectives][Filter design objectives]]
   - [[#analogue-prototype][Analogue Prototype]]
   - [[#sensor-noise][Sensor noise]]
-  - [[#settling-time-vs-cuttof-frequency][Settling Time vs Cuttof Frequency]]
+  - [[#settling-time-vs-cut-off-frequency][Settling Time vs Cut-off Frequency]]
   - [[#filter-order][Filter order]]
   - [[#final-design][Final design]]
 - [[#implementation][Implementation]]
@@ -138,7 +140,7 @@ The tilt sensor is predicated on the knowledge that the gravity vector will alwa
 #+label: fig:HighlevelDataflowDiag
 [[file:Figures/Dataflow.drawio.png]]
 
-The sensor used to measure acceleration is the ADXL335, this is a three axis accelerometer which outputs its values via DAC as three analogue signals. These analogue signals are digitised by the Arduino which is acting purely as an acquisition device. Real-time data is then passed python using the firmatta protocol, where data processing such as filtering and angle measurement occurs. [@fig:HighlevelDataflowDiag] shows the high-level structure of the tilt sensor.
+The sensor used to measure acceleration is the ADXL335, this is a three axis accelerometer which outputs its values via DAC as three analogue signals. These analogue signals are digitised by the Arduino which is acting purely as an acquisition device. Real-time data is then passed python using the firmatta protocol, where data processing such as filtering and angle measurement occurs. Figure 1 shows the high-level structure of the tilt sensor.
 * Filter design objectives :Ben:main:
 :notes:
 - [ ] justify filter design requirements
@@ -200,18 +202,18 @@ The first factor influencing the choice of filter cut-off is the distribution of
 #+caption: Fourier transform of raw accelerometer data showing sensor noise
 #+label: fig:sensorNoise
 [[file:Figures/filterDesign_HarmonicNoise_Rest.png]]
-As we can see from Figure xx, sensor noise is relatively evenly distributed in the frequency domain. with only a slight concentration of harmonics around 100Hz. This means that there is no particular requirement to have a steep transition width since we are only concerned with unity response at DC and have roughly two decades of roll-off before the dominant frequencies at 100Hz at which point even a first order bessel will suffice.
+As we can see from Figure 2, sensor noise is relatively evenly distributed in the frequency domain. with only a slight concentration of harmonics around 100Hz. This means that there is no particular requirement to have a steep transition width since we are only concerned with unity response at DC and have roughly two decades of roll-off before the dominant frequencies at 100Hz at which point even a first order bessel will suffice.
 :notes:
 - [ ] present approach for quantifying noise
 - [ ] discuss problems due to dc spectral leakage
 - [ ] eliminate using time-domain first order polynomial fit
 :END:
-** Settling Time vs Cuttof Frequency :Ben:
+** Settling Time vs Cut-off Frequency :Ben:
 :notes:
 - [ ] discuss how settling time is a metric for responsiveness
 - [ ] point out the fundamental 2 between filter cutoff frequency and
 :END:
-Since the objective of the filter is to reject all but DC but also remain responsive (settling time) we must consider if and how these two requirements interact. As shown in Figure xx there exists a fundamental trade-off between settling time and cut-off frequency.
+Since the objective of the filter is to reject all but DC but also remain responsive (settling time) we must consider if and how these two requirements interact. As shown in Figure 3 there exists a fundamental trade-off between settling time and cut-off frequency.
 #+ATTR_ORG: :width 600
 #+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
@@ -219,7 +221,7 @@ Since the objective of the filter is to reject all but DC but also remain respon
 #+label: fig:cuttofVsSettleTimeTradeoff
 [[file:Figures/filterDesign_SettleTimeVsFc.png]]
 
-This plot was generated numerically by applying a step filter designs with different cutoff frequencies and logging the settling time (for Bessel this is simply the first intersection between the step response and line \(y=0.9\)) denoted in Figure xx. The cut-off frequencies are exponentially spaced between 0.2 and 20 Hz in order to have good coverage of the corner between the two asymptotes.
+This plot was generated numerically by applying a step filter designs with different cutoff frequencies and logging the settling time (for Bessel this is simply the first intersection between the step response and line \(y=0.9\)) denoted in Figure 4. The cut-off frequencies are exponentially spaced between 0.2 and 20 Hz in order to have good coverage of the corner between the two asymptotes.
 #+ATTR_ORG: :width 600
 #+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
@@ -238,7 +240,7 @@ For the final design, a cut-off frequency of 5 Hz will be used since this prefor
 - [ ] It is effectively a free degree of freedom that allows a limited improvement to settling time at the cost of additional computation
 - [ ] only important when cutoff frequency bottoms out
 :END:
-A further degree of freedom in the design is that of the filter order used. Typically the impact of higher filter order is faster transition width, which, as mentioned previously is only a very minor consideration here, while the increased computational cost associated with this incur a substantial penalty. It is plausible however that increased filter order might have an impact on the rise time of the filter. Figure xx show the trade-off plots for different orders of Bessel Filter.
+A further degree of freedom in the design is that of the filter order used. Typically the impact of higher filter order is faster transition width, which, as mentioned previously is only a very minor consideration here, while the increased computational cost associated with this incur a substantial penalty. It is plausible however that increased filter order might have an impact on the rise time of the filter. Figure 5 shows the trade-off plots for different orders of Bessel Filter.
 #+ATTR_ORG: :width 600
 #+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
@@ -246,7 +248,7 @@ A further degree of freedom in the design is that of the filter order used. Typi
 #+label: fig:besselSettletime_MultiOrder
 [[file:Figures/filterDesign_Bessel_SettleTimeVsFc_MultipleFilterOrders.png]]
 
-From this figure we can see that increasing filter order has a detrimental impact on the settling time trade-off curve. It is a simple decision therefore to limit the filter order to first order given that there is little benifit decreased transition width. This plot was again generated numerically using exponentially spaced cut-off frequencies between 0 and 20Hz but as well as even filter orders between 2 and 8. The corresponding impulse and frequency responses of these filters are shown below.
+From this figure we can see that increasing filter order has a detrimental impact on the settling time trade-off curve. It is a simple decision therefore to limit the filter order to first order given that there is little benefit decreased transition width. This plot was again generated numerically using exponentially spaced cut-off frequencies between 0 and 20Hz but as well as even filter orders between 2 and 8. The corresponding impulse and frequency responses of these filters are shown below.
 #+ATTR_ORG: :width 600
 #+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
@@ -254,7 +256,7 @@ From this figure we can see that increasing filter order has a detrimental impac
 #+label: fig:BesselImpulseResp_MultiOrder
 [[file:Figures/filterDesign_Bessel_ImpulseResp_MultipleFilterOrders.png]]
 ** Final design :Ben:
-The Final Filter design parameters are given in Table xx. [fn::Filter coefficients will be presented in the following sections, since this is a function of sample rate.]
+The Final Filter design parameters are given in Table 2. [fn::Filter coefficients will be presented in the following sections, since this is a function of sample rate.]
 #+ATTR_LATEX: placement [H]
 #+caption: final filter design parameters
 #+NAME: FinalFiltDesignParams
@@ -283,7 +285,7 @@ In practice to get the half second timing the animation callback feature of matp
 
 This method was implemented and tested  single input channel at 1kHz where the measured value stayed between 950Hz and 1050Hz. However, when more input channels are added the sample rate starts to reduce. This may be because either the Arduino or the python script can’t run fast enough to process that many samples.
 
-** TODO Filter design :Cammeron:
+** Filter design :Cammeron:
 :notes:
 - [ ] just a brief overview of the high-level design commands used
 - [ ] Reiterate the cutoff frequency decided above
@@ -299,7 +301,7 @@ fn = fs/2
 fc = 2 # cutoff frequency (Hz)
 sos = signal.bessel(1, fc / fn, "lowpass", output="sos", norm="mag")
 #+end_src
-This design function outputs filter coefficients grouped into bi-quads. The basic structure of such a biquad is shown in Figure xx. This is the coefficient naming convention that will be used when discussing and presenting filter designs in this report.
+This design function outputs filter coefficients grouped into bi-quads. The basic structure of such a biquad is shown in Figure 7. This is the coefficient naming convention that will be used when discussing and presenting filter designs in this report.
 #+ATTR_ORG: :width 300
 #+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
@@ -457,7 +459,7 @@ def calcAngles(vec):
         angle[i] = np.rad2deg(angle1)
 #+end_src
 ** Setup
-Figure XX shows the setup used for testing the tilt sensor. The Arduino board is connected to the ADXL335 breakout board via three jumper wires, while power and ground is supplied from the arduino onboard power pins.
+Figure 8 shows the setup used for testing the tilt sensor. The Arduino board is connected to the ADXL335 breakout board via three jumper wires, while power and ground is supplied from the arduino onboard power pins.
 #+ATTR_ORG: :width 600
 #+ATTR_LATEX:  :width 300pt
 #+ATTR_LATEX: placement [H]
@@ -476,7 +478,7 @@ A full demonstration of the filter operating in real time can be found here (ful
 - [[https://youtu.be/p1zuRrrh6NQ][Demonstrating Angle Measurement]]
 - [[https://youtu.be/6KL1qg4h9OE][Demonstrating Responsiveness]]
 
-Figures xx and xx show the effect of filtering on the raw accelerometer data. It can be seen that the filter acts to smooth the data while also introducing a time lag.
+Figures 9 and 10 show the effect of filtering on the raw accelerometer data. It can be seen that the filter acts to smooth the data while also introducing a time lag.
 #+ATTR_ORG: :width 600
 #+ATTR_LATEX:  :width 300pt
 #+ATTR_LATEX: placement [H]
