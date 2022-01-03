@@ -80,34 +80,36 @@ Need to know:
 - [[#filter-design-objectives][Filter design objectives]]
   - [[#analogue-prototype][Analogue Prototype]]
   - [[#sensor-noise][Sensor noise]]
-  - [[#procedure-for-quantifying-sensor-noise][Procedure for Quantifying sensor noise]]
-  - [[#harmonic-content-due-to-sensor-movement][Harmonic content due to sensor movement]]
-  - [[#settling-time][Settling Time]]
+  - [[#settling-time-vs-cuttof-frequency][Settling Time vs Cuttof Frequency]]
   - [[#filter-order][Filter order]]
   - [[#final-design][Final design]]
 - [[#implementation][Implementation]]
   - [[#sample-rate-verification][Sample rate Verification]]
   - [[#filter-design][Filter design]]
   - [[#filter-unit-testing][Filter Unit Testing]]
-    - [[#low-pass][Low-Pass:]]
-    - [[#high-pass][High-Pass:]]
+    - [[#generic-low-pass-unit-test-design][Generic Low-Pass Unit test design:]]
+    - [[#low-pass-hand-calculations][Low-Pass hand calculations]]
+    - [[#generic-high-pass-unit-test-design][Generic High-Pass Unit test design:]]
+    - [[#highpass-hand-calculations][Highpass hand calculations]]
   - [[#angle-measurement][Angle measurement]]
+  - [[#setup][Setup]]
 - [[#results][Results]]
 - [[#design-review][Design Review]]
 - [[#future-work][Future work]]
-- [[#conclusion][conclusion]]
-- [[#bibliography][Bibliography]]
+  - [[#digital-comms][Digital Comms]]
+  - [[#dynamic-recalculation-of-filter-coefficient][Dynamic recalculation of filter coefficient]]
 - [[#appendices][Appendices]]
+  - [[#links][Links]]
+    - [[#project-source-code][Project Source code]]
+    - [[#filter-source-code][Filter Source code]]
+    - [[#angle-measurment-demo----httpsyoutubep1zurrrh6nq][Angle Measurment Demo -  [[https://youtu.be/p1zuRrrh6NQ]]]]
+    - [[#responsiveness-demo----httpsyoutube6kl1qg4h9oe][Responsiveness Demo -  [[https://youtu.be/6KL1qg4h9OE]]]]
   - [[#code][Code]]
     - [[#realtime_iir_mainpy][realtime_iir_main.py]]
     - [[#rununittestpy][rununittest.py]]
     - [[#calcanglespy][calcAngles.py]]
     - [[#realtime_iir_mainpy-1][realtime_iir_main.py]]
     - [[#realtime_plotpy][realtime_plot.py]]
-  - [[#links][Links]]
-    - [[#project-source-code][Project Source code]]
-    - [[#filter-source-code][Filter Source code]]
-    - [[#project-demonstration-youtube-video][Project demonstration YouTube Video]]
 
 * Introduction :Ben:Peter:main:
 :notes:
@@ -130,7 +132,8 @@ The high-level design objectives for this project are summarised as follows:
 The tilt sensor is predicated on the knowledge that the gravity vector will always be pointed directly down towards the centre of the earth. If the assumption is then made that the device is otherwise at rest, we may infer the pitch and roll of the device by observing the projection of the gravity vector on the respective axes.
 
 #+ATTR_ORG: :width 600
-#+ATTR_LATEX:  :width 300
+#+ATTR_LATEX:  :width 300pt
+#+ATTR_LATEX: placement [H]
 #+caption: Tilt sensor High-level Dataflow Diagram
 #+label: fig:HighlevelDataflowDiag
 [[file:Figures/Dataflow.drawio.png]]
@@ -160,7 +163,7 @@ The high-level design objectives can be translated into requirements for the fil
 - Eliminate environmental noise where possible i.e. vibrations
 - Good transient behaviour for DC changes i.e. fast response, no overshoot
 
-Acceleration at rest will be a dc value, a low-pass filter is required.
+Acceleration at rest will be a dc value, as such a low-pass filter is required.
 
 The primary requirement on the filter implementation is whether the filter can be realised in real time. Since python is an interpreted language, the speed of execution is fundamentally limited and as such the amount of computation required for filtering should be minimised. In this regard, IIR filters are certainly the most optimal, since on a per computation basis they offer better performance than FIR filters. Higher order IIR filters will of course still come at the cost of more computation and as such, the order of the filters should be kept minimal as a design goal.
 
@@ -183,50 +186,48 @@ Acceleration measured due to gravity is at steady state a dc value, as such the 
 
 The requirement for good transient characteristics penalises the Butterworth and Chebychev filters since both suffer from overshoot while the Bessel filter doesn't. The Bessel filter also has a faster settling time when compared to the other analogue designs.
 
-** TODO Sensor noise :Ben:
+** Sensor noise :Ben:
 :notes:
 - [ ] discuss noise in accelerometers in general
 - [ ] potential additional noise sources (ADCs/EMF)
 - [ ] mention that noise tends to be relatively speaking higher frequency and uniformly distributed in the frequency domain
 :END:
-The first factor influencing the choice of filter cut-off is the distribution of filter noise. The noise content of the accelerometer data is confirmed by taking a recording of the filter at rest and taking a Fourier transform.
-** TODO Procedure for Quantifying sensor noise :Ben:
+The first factor influencing the choice of filter cut-off is the distribution of filter noise. The noise content of the accelerometer data is confirmed by taking a recording of the filter at rest and taking a Fourier transform for a single channel. [fn::After investigation noise is similar in all three channels but only one is plotted here]
+
+#+ATTR_ORG: :width 400
+#+ATTR_LATEX:  :width 400pt
+#+ATTR_LATEX: placement [H]
+#+caption: Fourier transform of raw accelerometer data showing sensor noise
+#+label: fig:sensorNoise
+[[file:Figures/filterDesign_HarmonicNoise_Rest.png]]
+As we can see from Figure xx, sensor noise is relatively evenly distributed in the frequency domain. with only a slight concentration of harmonics around 100Hz. This means that there is no particular requirement to have a steep transition width since we are only concerned with unity response at DC and have roughly two decades of roll-off before the dominant frequencies at 100Hz at which point even a first order bessel will suffice.
 :notes:
 - [ ] present approach for quantifying noise
 - [ ] discuss problems due to dc spectral leakage
 - [ ] eliminate using time-domain first order polynomial fit
 :END:
-** TODO Harmonic content due to sensor movement :Ben:
-:notes:
-- [ ] we want to reject this
-- [ ] discuss how sensor motion will disturb the measurement of angle
-- [ ] (present figure) show the harmonic content of the sensor under motion vs at rest
-  + comparison plots should be at the same sample rate and length (can be achieved by cropping the longer "at rest" recording)
-  + identify and comment on the frequency range of these harmonics
-- [ ] comment on the trade off between settling time and rejection of noise/ disturbances and settling time
-- [ ] lower priority than sensor noise
-:END:
-In order to inform
-** Settling Time :Ben:
+** Settling Time vs Cuttof Frequency :Ben:
 :notes:
 - [ ] discuss how settling time is a metric for responsiveness
 - [ ] point out the fundamental 2 between filter cutoff frequency and
 :END:
 Since the objective of the filter is to reject all but DC but also remain responsive (settling time) we must consider if and how these two requirements interact. As shown in Figure xx there exists a fundamental trade-off between settling time and cut-off frequency.
 #+ATTR_ORG: :width 600
-#+ATTR_LATEX:  :width 400
+#+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
 #+caption: Trade-off between settling time and cut-off frequency for a second order Bessel filter
-#+label: fig: cuttofVsSettleTimeTradeoff
+#+label: fig:cuttofVsSettleTimeTradeoff
 [[file:Figures/filterDesign_SettleTimeVsFc.png]]
 
 This plot was generated numerically by applying a step filter designs with different cutoff frequencies and logging the settling time (for Bessel this is simply the first intersection between the step response and line \(y=0.9\)) denoted in Figure xx. The cut-off frequencies are exponentially spaced between 0.2 and 20 Hz in order to have good coverage of the corner between the two asymptotes.
 #+ATTR_ORG: :width 600
-#+ATTR_LATEX:  :width 400
+#+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
 #+caption: Impulse, frequency domain responses of second order Bessel filters with various cutoff frequencies.
-#+label: fig:label
+#+label: fig:BesselImpulseResp_singleOrder
 [[file:Figures/filterDesign_ImpulseResp.png]]
+
+For the final design, a cut-off frequency of 5 Hz will be used since this preforms adequately at removing noise while incurring little to no penalty in responsiveness (settling time).
 ** Filter order :Ben:
 :notes:
 - [ ] Filter order directly influences the maximum achievable transition width
@@ -239,28 +240,28 @@ This plot was generated numerically by applying a step filter designs with diffe
 :END:
 A further degree of freedom in the design is that of the filter order used. Typically the impact of higher filter order is faster transition width, which, as mentioned previously is only a very minor consideration here, while the increased computational cost associated with this incur a substantial penalty. It is plausible however that increased filter order might have an impact on the rise time of the filter. Figure xx show the trade-off plots for different orders of Bessel Filter.
 #+ATTR_ORG: :width 600
-#+ATTR_LATEX:  :width 400
+#+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
 #+caption: Trade-off between settling time and cut-off frequency for multiple orders Bessel filter orders
-#+label: fig:label
+#+label: fig:besselSettletime_MultiOrder
 [[file:Figures/filterDesign_Bessel_SettleTimeVsFc_MultipleFilterOrders.png]]
 
-From this figure we can see that increasing filter order has a detrimental impact on the settling time trade-off curve. It is a simple decision therefore to limit the filter order to second order. This plot was again generated numerically using exponentially spaced cut-off frequencies between 0 and 20Hz but as well as even filter orders between 2 and 8. The corresponding impulse and frequency responses of these filters are shown below.
+From this figure we can see that increasing filter order has a detrimental impact on the settling time trade-off curve. It is a simple decision therefore to limit the filter order to first order given that there is little benifit decreased transition width. This plot was again generated numerically using exponentially spaced cut-off frequencies between 0 and 20Hz but as well as even filter orders between 2 and 8. The corresponding impulse and frequency responses of these filters are shown below.
 #+ATTR_ORG: :width 600
-#+ATTR_LATEX:  :width 400
+#+ATTR_LATEX:  :width 400pt
 #+ATTR_LATEX: placement [H]
 #+caption: Impulse, frequency domain responses of second order Bessel filters with various cutoff frequencies and filter orders.
-#+label: fig:label
+#+label: fig:BesselImpulseResp_MultiOrder
 [[file:Figures/filterDesign_Bessel_ImpulseResp_MultipleFilterOrders.png]]
-** TODO Final design :Ben:
+** Final design :Ben:
 The Final Filter design parameters are given in Table xx. [fn::Filter coefficients will be presented in the following sections, since this is a function of sample rate.]
 #+ATTR_LATEX: placement [H]
 #+caption: final filter design parameters
-#+NAME: filtDesignParams
-
-| Analogue Prototype | Filter order | Cut-off Frequency (Hz) |
-|--------------------+--------------+------------------------|
-| Bessel             | 2nd          |                      2 |
+#+NAME: FinalFiltDesignParams
+| Analogue  | Filter | Cut-off        |
+| Prototype | order  | Frequency (Hz) |
+|-----------+--------+----------------|
+| Bessel    | 1st    | 5              |
 
 * Implementation :Ben:Cammeron:main:
 :notes:
@@ -290,16 +291,18 @@ This method was implemented and tested  single input channel at 1kHz where the m
 - [ ] Present the final filter design
 - [ ] discuss the impact of non ideal sample rate here
 :END:
-The final design coefficients were derived using the scipy signal library bessel design command sudo source-code shown below:
+The final design coefficients were derived using the scipy signal library bessel design command source-code shown below:
 #+begin_src python :results: var
 from scipy import signal
 fs = 650 # sample rate
+fn = fs/2
 fc = 2 # cutoff frequency (Hz)
 sos = signal.bessel(1, fc / fn, "lowpass", output="sos", norm="mag")
 #+end_src
 This design function outputs filter coefficients grouped into bi-quads. The basic structure of such a biquad is shown in Figure xx. This is the coefficient naming convention that will be used when discussing and presenting filter designs in this report.
 #+ATTR_ORG: :width 300
-#+ATTR_LATEX:  :width 400
+#+ATTR_LATEX:  :width 400pt
+#+ATTR_LATEX: placement [H]
 #+caption: Direct form II Biquad IIR filter showing coefficient naming convention
 #+label: fig: DfdBiquad
 [[file:Figures/Direct_Form_II_dataflow.png]]
@@ -308,90 +311,40 @@ This results in the following filter coefficients:
 #+ATTR_LATEX: placement [H]
 #+caption: Final Filter Design Coefficients
 #+NAME: FinalFiltDesCoef
-| b0 | b1 | b2 | a0 | a1 | a2 |
-|----+----+----+----+----+----|
-|    |    |    |    |    |    |
+|         b0 |         b1 | b2 | a0 |         a1 | a2 |
+|------------+------------+----+----+------------+----|
+| 9.67419e-3 | 9.57419e-3 |  0 |  1 | 0.98085162 |  0 |
 
 ** Filter Unit Testing :Cammeron:
-*** Low-Pass:
-2nd order IIR Filter with a cut-off at a normalized frequency of 0.1
-\begin{align}
-H(z) = (0.06745527+0.13491055z-1+0.06745527z-2)/(1-1.1429805z-1+ 0.4128016z-2)
-\end{align}
+Unit testing is conducted by first generating a generic high and lowpass design and then hand calculating the expected output by using the difference equation for a second order IIR filter.
 
+The transfer function for a second order biquad filter is given in the z domain by:
+\begin{align}
+H(z) = \frac{Y(z)}{X(z)} = \frac{b_0 +b_1z^{-1} + b_2z^{-2}}
+{a_0 + a_1z^{-1}+a_2z^{-2}}
+\end{align}
+This yields the following difference equation in the time-domain:
+\begin{align}
+v[n] &= x[n]-a_1\times y[n-1] -a_2\times y[n-2]\\
+y[n] &= v[n]\times b_0 + b_1\times y[n-1] + b_2\times y[n-2]
+\end{align}
+For the purpose of simplifying notation in the hand calculations the following substitutions will be made:
+\begin{align}
+y[n-1] &= T1\\
+y[n-2] &= T2
+\end{align}
+These difference equations allow the expected output of the filter to be calculated recursively.
+*** Generic Low-Pass Unit test design:
+This is a generic 2nd order IIR Filter with a cut-off at a normalized frequency of 0.1
 #+ATTR_LATEX: placement [H]
 #+caption: Contains the filter coefficients for the low pass unit test filter
-#+NAME: LpFilterCoef
+#+NAME: LpFilterCoef_unitTest
 |         b0 |         b1 |         b2 | a0 |        a1 |         a2 |
 |------------+------------+------------+----+-----------+------------|
 | 0.06745527 | 0.13491055 | 0.06745527 |  1 | 1.1429805 | -0.4128016 |
-
-*** High-Pass:
-2nd order IIR Filter with a cut-off at a normalized frequency of 0.3
-\begin{align}
-H(z) = (0.20657208 -0.41314417z-1+0.20657208z-2)/(1-0.36952738z-1+ 0.19581571z-2)
-\end{align}
-
-
-
-#+ATTR_LATEX: placement [H]
-#+caption: Contains the filter coefficients for the high pass unit test filter
-#+NAME: LpFilterCoef
-|         b0 |          b1 |       b2 | a0 |       a1 | a2         |
-|------------+-------------+----------+----+----------+------------|
-| 0.206572   | -0.413144   | 0.206572 |  1 | 0.369527 | - 0.195815 |
-
-Level Sensor Filter responses:
-Low-Pass:
-2nd order IIR Filter with a cut-off at a normalized frequency of 0.001
-H(z) = (9.44691844e-4+1.88938369e-3z-1+9.44691844e-4z-2)/(1-1.91119707z-1+ 0.914975835z-2)
-
-
-‘b’ Coefficients
-‘a’ Coefficients
-b0
-b1
-b2
-a0
-a1
-a2
-9.44691844e-4
-1.88938369e-3
-9.44691844e-4
-1
-1.91119707
--0.914975835
-
-Table 3: Contains the filter coefficients for the low pass filter of the level sensor
-
-
-High-Pass:
-2nd order IIR Filter with a cut-off at a normalized frequency of 0.02
-H(z) = (0.99778102 -1.99556205z-1+0.99778102z-2)/(1-1.99555712z-1+0.99556697z-2)
-
-
-‘b’ Coefficients
-‘a’ Coefficients
-b0
-b1
-b2
-a0
-a1
-a2
-0.99778102
--1.99556205
-0.99778102
-1
-1.99555712
--0.99556697
-
-Table 4: Contains the filter coefficients for the high pass filter of the level sensor
-
-
-
-
+*** Low-Pass hand calculations
 Hand calculation for the lowpass filter when given an input signal x(n) = [1,3,5]:
-
+#+begin_src python
 T1 = T2 = 0
 
 Input = x(n) - (a1*T1) - (a2*T2)
@@ -427,11 +380,22 @@ y(3)    = [x(3) - (a1*T1) - (a2*T2)]*b0 + b1*T1 + b2*T2
 
 T2 = T1 = 4.1429805
 T1 = input = 9.322544323
-
+#+end_src
 Therefore our output y(n) = [0.0675, 0.4144, 1.2552]
+*** Generic High-Pass Unit test design:
+This is a 2nd order IIR Filter with a cut-off at a normalized frequency of 0.3.
 
+#+ATTR_LATEX: placement [H]
+#+caption: Contains the filter coefficients for the high pass unit test filter
+#+NAME: HpFilterCoef_unitTest
+|         b0 |          b1 |       b2 | a0 |       a1 | a2         |
+|------------+-------------+----------+----+----------+------------|
+| 0.206572   | -0.413144   | 0.206572 |  1 | 0.369527 | - 0.195815 |
+
+Compare these output values with the filter output when used in the unittest.py program.
+*** Highpass hand calculations
 Hand calculation for the highpass filter when given an input signal x(n) = [6,-8,3]:
-
+#+begin_src python
 T1 = T2 = 0
 
 Input = x(n) - (a1*T1) - (a2*T2)
@@ -468,18 +432,66 @@ T2 = T1 = -10.21716428
 T1 = input = 5.600627687
 
 Therefore our output y(n) = [1.2394, -4.5894, 6.6175]
-
-Compare these output values with the filter output when used in the unittest.py program.
-
+#+end_src
 ** Angle measurement :Ben:
+The three angels defining the orientation of the device are simply defined as the angel between the orientation vector and the three orthogonal coordinate axes. Since this formula is invariant to the magnitude of the vectors involved, the unit vector is used for simplicity (denoted as \(\hat{x}\)).
+
+\begin{align}
+ xangle =cos^{-1}
+ \frac{\vec{V}_{xyz}\cdot \hat{x}}{|\hat{x}|\times|\vec{V}_{xyz}|}
+\end{align}
+The source code for the is shown below, this calculation is implemented for all three angels in a for loop. [fn:: The final angle used in the display is chosen based on which corresponds to the longest side of the breadboard, as such tilt is only returned for one axis in the demonstration video]
+#+begin_src python
+def calcAngles(vec):
+    """returns the angles of a 3d vector relative to the orthoginal unit vectors"""
+    angle = np.zeros(3)
+    referenceFrame = []
+    referenceFrame.append([1.0,0.0,0.0])
+    referenceFrame.append([0.0,1.0,0.0])
+    referenceFrame.append([0.0,0.0,1.0])
+    for i in range(3):
+        if DoDebug:
+            print(f"unitVec{i} = {referenceFrame[i]}")
+        part1=np.dot(vec,referenceFrame[i])/ (ln.norm(vec)*ln.norm(referenceFrame[i]))
+        angle1 = np.arccos(part1)
+        angle[i] = np.rad2deg(angle1)
+#+end_src
+** Setup
+Figure XX shows the setup used for testing the tilt sensor. The Arduino board is connected to the ADXL335 breakout board via three jumper wires, while power and ground is supplied from the arduino onboard power pins.
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX:  :width 300pt
+#+ATTR_LATEX: placement [H]
+#+caption: Tilt sensor Hardware setup
+#+label: fig:tiltSensehardwareSetup
+[[file:Figures/Setup.jpg]]
 * Results :Cammeron:main:
 :notes:
 Treat this section as presentation of results
 - [ ] present plot of the raw vs filtered data
 - [-] discuss the achieved sample rate
 - [ ] link to youtube video
-- [ ] with reference to the youtube video + cammeron's pics with the protractor discuss success
 :END:
+
+A full demonstration of the filter operating in real time can be found here (full URL in appendices):
+- [[https://youtu.be/p1zuRrrh6NQ][Demonstrating Angle Measurement]]
+- [[https://youtu.be/6KL1qg4h9OE][Demonstrating Responsiveness]]
+
+Figures xx and xx show the effect of filtering on the raw accelerometer data. It can be seen that the filter acts to smooth the data while also introducing a time lag.
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX:  :width 300pt
+#+ATTR_LATEX: placement [H]
+#+caption: Raw accelerometer data before and after filtering at rest
+#+label: fig:beforeVsAfterFilt_motion
+[[file:Figures/filterDesign_BeforeVsAfterFilt_UnderMotion.png]]
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX:  :width 300pt
+#+ATTR_LATEX: placement [H]
+#+caption: Raw accelerometer data before and after filtering at rest
+#+label: fig:beforeVsAfterFilt_rest
+[[file:Figures/filterDesign_BeforeVsAfterFilt_AtRest.png]]
+
+From the video demonstration it can be seen that the tilt sensor returns accurate and stable angle measurements. Further more the tilt sensor reacts quickly to changes in angle.
 * Design Review :Ben:main:
 :notes:
 - [ ] discuss limitations
@@ -487,21 +499,19 @@ Treat this section as presentation of results
   + using just accelerometer measurements
   + the ADCs on the arduino limit precision and introduce noise (use digital comms between the accelerometer and the arduino)
 :END:
+Given that the testing of the filter revealed that it provided accurate angle measurement, wile remaining responsive, it can be said that the initial design objectives of the project have been met.
+
+One potential weakness of the design is the hard coded nature of the filter design while the sample rate seems constrained by the hardware in use and may as such be variable between users. This however should not substantially affect the usage of the filter since changes in sample rate for a given set of filter coefficient will merely act to move the effective cut-off frequency of the filter which, as discussed in prior sections is not a critical component of the design.
 * Future work :Ben:main:
 :notes:
 - [ ] improvements
   + [ ] have the filter design recalculate based on average sample-rate
   + [ ] more instantaneous response using a gyroscope + sensor fusion
 :END:
-* conclusion :Peter:Cammeron:Ben:main:
-# this probably needs to wait until we have a first draught ready
-# and will likey end up being a last minuet task
-:notes:
-- [ ] challenges faced
-  + [ ] problems with firmatta I2C (documented progress)
-- [ ] reiterate that we were successful
-:END:
-* Bibliography
+** Digital Comms
+One possible improvement could come in the form of a digital interface rather than analogue voltages between the arduino such as the I2C protocol. This was initially attempted but abandoned due to difficulties in using and debugging I2C with the firmatta library. the benefit of such a comms protocol would be eliminating a potential source of noise in the wires, and not being limited to the analogue resolution of the arduino ADCs which is substantially lower than those on the accelerometer itself.
+** Dynamic recalculation of filter coefficient
+To combat the aforementioned drift of cut-off frequency due to hardware dependent sample rate, the filter could be recalculated "on the fly" based on the measure sample rate.
 
 * Appendices :Ben:
 :notes:
@@ -512,6 +522,13 @@ Treat this section as presentation of results
   + link to bernds source code
 - [ ] description of the link
 :END:
+** Links
+*** [[https://github.com/Cameron1500/DSP_Assignment][Project Source code]] :Ben:
+# our repo
+*** [[https://github.com/berndporr/py-iir-filter][Filter Source code]] :Ben:
+# bernds repo
+*** Angle Measurment Demo -  [[https://youtu.be/p1zuRrrh6NQ]] :Cammeron:
+*** Responsiveness Demo -  [[https://youtu.be/6KL1qg4h9OE]]
 ** Code
 *** realtime_iir_main.py
 #+INCLUDE: "Python Code/realtime_iir_main.py" src python :lines ""
@@ -523,9 +540,3 @@ Treat this section as presentation of results
 #+INCLUDE: "Python Code/realtime_iir_main.py" src python :lines ""
 *** realtime_plot.py
 #+INCLUDE: "Python Code/realtime_plot.py" src python :lines ""
-** Links
-*** [[https://github.com/Cameron1500/DSP_Assignment][Project Source code]] :Ben:
-# our repo
-*** [[https://github.com/berndporr/py-iir-filter][Filter Source code]] :Ben:
-# bernds repo
-*** Project demonstration YouTube Video :Cammeron:
