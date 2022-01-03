@@ -10,10 +10,10 @@ import csv
 import pandas
 import os
 
-thisRecording2Plot = ["SwipeDown_1.csv"]
+thisRecording2Plot = ["Rest.csv"]
 RecordingsDirRelPath = "Recordings/" # directory of recordings relative to the project root
 figuresRelPath = "Figures/" # figures dir relative to the project root
-saveNames = ["filterDesign_HarmonicNoise.png"]
+saveNames = ["filterDesign_HarmonicNoise_Rest.png"]
 doSave = True
 doShow= True
 fs = 1000
@@ -67,7 +67,7 @@ plt.ylabel("|x|")
 plt.title("Harmonic Content of the Accelerometer Data")
 plt.grid()
 plt.xlim((0,500))
-plt.ylim((0,26))
+# plt.ylim((0,26))
 if doSave:
     plt.savefig(savePath[0])
 if doShow:

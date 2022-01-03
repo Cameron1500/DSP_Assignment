@@ -13,7 +13,6 @@ import re
 ####### User params ############
 fs = 1000   # Max 1000
 fn = fs / 2
-filterOrd = 1
 figuresRelPath = "Figures/" # figures dir relative to the project root
 saveNames = ["filterDesign_ImpulseResp.png","filterDesign_SettleTimeVsFc.png"]
 doSave = True
