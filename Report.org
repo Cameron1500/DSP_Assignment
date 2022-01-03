@@ -482,7 +482,7 @@ Figures 9 and 10 show the effect of filtering on the raw accelerometer data. It 
 #+ATTR_ORG: :width 600
 #+ATTR_LATEX:  :width 300pt
 #+ATTR_LATEX: placement [H]
-#+caption: Raw accelerometer data before and after filtering at rest
+#+caption: Raw accelerometer data before and after filtering in motion
 #+label: fig:beforeVsAfterFilt_motion
 [[file:Figures/filterDesign_BeforeVsAfterFilt_UnderMotion.png]]
 
