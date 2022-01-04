@@ -76,7 +76,7 @@ Need to know:
 - [ ] If possible also run the real-time plotting code
 - [ ] verify content of report PDF is satisfactory
 
-* Table Of contents :TOC_3:noexport:
+* Table Of contents :TOC_2:noexport:
 - [[#introduction][Introduction]]
 - [[#working-principles][Working Principles]]
 - [[#filter-design-objectives][Filter design objectives]]
@@ -89,10 +89,6 @@ Need to know:
   - [[#sample-rate-verification][Sample rate Verification]]
   - [[#filter-design][Filter design]]
   - [[#filter-unit-testing][Filter Unit Testing]]
-    - [[#generic-low-pass-unit-test-design][Generic Low-Pass Unit test design:]]
-    - [[#low-pass-hand-calculations][Low-Pass hand calculations]]
-    - [[#generic-high-pass-unit-test-design][Generic High-Pass Unit test design:]]
-    - [[#highpass-hand-calculations][Highpass hand calculations]]
   - [[#angle-measurement][Angle measurement]]
   - [[#setup][Setup]]
 - [[#results][Results]]
@@ -102,16 +98,7 @@ Need to know:
   - [[#dynamic-recalculation-of-filter-coefficient][Dynamic recalculation of filter coefficient]]
 - [[#appendices][Appendices]]
   - [[#links][Links]]
-    - [[#project-source-code][Project Source code]]
-    - [[#filter-source-code][Filter Source code]]
-    - [[#angle-measurment-demo----httpsyoutubep1zurrrh6nq][Angle Measurment Demo -  [[https://youtu.be/p1zuRrrh6NQ]]]]
-    - [[#responsiveness-demo----httpsyoutube6kl1qg4h9oe][Responsiveness Demo -  [[https://youtu.be/6KL1qg4h9OE]]]]
   - [[#code][Code]]
-    - [[#realtime_iir_mainpy][realtime_iir_main.py]]
-    - [[#rununittestpy][rununittest.py]]
-    - [[#calcanglespy][calcAngles.py]]
-    - [[#realtime_iir_mainpy-1][realtime_iir_main.py]]
-    - [[#realtime_plotpy][realtime_plot.py]]
 
 * Introduction :Ben:Peter:main:
 :notes:
